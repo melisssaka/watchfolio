@@ -13,35 +13,6 @@ if ($conn->connect_error) {
 
 echo "Connected successfully<br>";
 
-$sql = '
-    INSERT INTO app_user
-    (
-        user_id,
-        username,
-        name,
-        email,
-        birth_year,
-        gender,
-        password
-    )
-    VALUES
-    (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?
-    )
-';
-
-$stmt = $conn->prepare($sql);
-
-if (!$stmt) {
-    die('Prepare failed: ' . $conn->error);
-}
-
 $firstNames = [
     'Charlie',
     'Julia',
@@ -74,40 +45,61 @@ $lastNames = [
     'Neumann'
 ];
 
-$genders = [
-    'Male',
-    'Female'
+$nationalities = [
+    'American',
+    'British',
+    'German',
+    'French',
+    'Italian',
+    'Canadian',
+    'Spanish',
+    'Japanese',
+    'Australian',
+    'Swedish'
 ];
 
-$insertedUsers = 0;
+$sql = '
+    INSERT INTO director
+    (
+        director_id,
+        name,
+        nationality
+    )
+    VALUES
+    (
+        ?,
+        ?,
+        ?
+    )
+';
 
-for ($i = 1; $i <= 20; $i++) {
-    $username = 'username' . $i;
+$stmt = $conn->prepare($sql);
+
+if (!$stmt) {
+    die('Prepare failed: ' . $conn->error);
+}
+
+$insertedDirectors = 0;
+
+for ($i = 1; $i <= 10; $i++) {
     $name = $firstNames[array_rand($firstNames)] . ' ' . $lastNames[array_rand($lastNames)];
-    $email = $username . '@gmail.com';
-    $birthYear = rand(1980, 2010);
-    $gender = $genders[array_rand($genders)];
-    $password = 'password123';
+    $nationality = $nationalities[array_rand($nationalities)];
 
     $stmt->bind_param(
-        'isssiss',
+        'iss',
         $i,
-        $username,
         $name,
-        $email,
-        $birthYear,
-        $gender,
-        $password
+        $nationality
     );
 
     if ($stmt->execute()) {
-        $insertedUsers++;
+        $insertedDirectors++;
     } else {
-        echo 'Insert failed for user ' . $i . ': ' . $stmt->error . '<br>';
+        echo 'Insert failed for director ' . $i . ': ' . $stmt->error . '<br>';
     }
 }
 
-echo $insertedUsers . ' users inserted';
+echo $insertedDirectors . ' directors inserted';
 
 $stmt->close();
 $conn->close();
