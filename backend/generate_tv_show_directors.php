@@ -30,11 +30,11 @@ function getIds(mysqli $conn, string $sql): array
     return $ids;
 }
 
-$tvShowIds = getIds($conn, 'SELECT content_id FROM tv_show');
-$directorIds = getIds($conn, 'SELECT director_id FROM director');
+$tvShowIds = getIds($conn, 'SELECT content_id FROM tv_show ORDER BY content_id LIMIT 20');
+$directorIds = getIds($conn, 'SELECT director_id FROM director ORDER BY director_id LIMIT 20');
 
-if (count($tvShowIds) === 0 || count($directorIds) === 0) {
-    die('Please generate tv shows and directors before generating tv show directors.');
+if (count($tvShowIds) < 20 || count($directorIds) < 20) {
+    die('Please generate 20 tv shows and 20 directors before generating tv show directors.');
 }
 
 $sql = '
@@ -59,7 +59,26 @@ if (!$stmt) {
 $insertedTvShowDirectors = 0;
 $usedPairs = [];
 $maxPairs = count($tvShowIds) * count($directorIds);
-$targetRows = min(10, $maxPairs);
+$targetRows = min(35, $maxPairs);
+
+foreach ($tvShowIds as $contentId) {
+    $directorId = $directorIds[array_rand($directorIds)];
+    $pairKey = $contentId . '-' . $directorId;
+
+    $usedPairs[$pairKey] = true;
+
+    $stmt->bind_param(
+        'ii',
+        $contentId,
+        $directorId
+    );
+
+    if ($stmt->execute()) {
+        $insertedTvShowDirectors++;
+    } else {
+        echo 'Insert failed for tv show ' . $contentId . ' and director ' . $directorId . ': ' . $stmt->error . '<br>';
+    }
+}
 
 while ($insertedTvShowDirectors < $targetRows) {
     $contentId = $tvShowIds[array_rand($tvShowIds)];
