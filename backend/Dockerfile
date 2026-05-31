@@ -15,14 +15,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/local/bin \
     --filename=composer
 
-# Copy composer files first
-COPY composer.json /var/www/html/composer.json
+# Copy ALL app files
+COPY . /var/www/html/
 
 # Install MongoDB PHP library
 RUN cd /var/www/html && composer install --no-dev
-
-# Copy ALL app files AFTER composer install
-COPY . /var/www/html/
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
