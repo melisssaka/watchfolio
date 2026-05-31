@@ -31,10 +31,10 @@ function getIds(mysqli $conn, string $sql): array
 }
 
 $tvShowIds = getIds($conn, 'SELECT content_id FROM tv_show ORDER BY content_id LIMIT 20');
-$directorIds = getIds($conn, 'SELECT director_id FROM director ORDER BY director_id LIMIT 20');
+$directorIds = getIds($conn, 'SELECT director_id FROM director ORDER BY director_id LIMIT 10');
 
-if (count($tvShowIds) < 20 || count($directorIds) < 20) {
-    die('Please generate 20 tv shows and 20 directors before generating tv show directors.');
+if (count($tvShowIds) < 20 || count($directorIds) < 10) {
+    die('Please generate 20 tv shows and 10 directors before generating tv show directors.');
 }
 
 $sql = '
