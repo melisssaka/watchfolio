@@ -1,0 +1,11 @@
+# Dependencies
+vendor/
+
+# Environment files
+.env
+
+# Docker volumes
+docker-volumes/
+
+# Mac system files
+.DS_Store
