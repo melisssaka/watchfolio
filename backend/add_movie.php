@@ -1,4 +1,5 @@
 <?php
+session_start();
 $dbHost = getenv('DB_HOST') ?: 'mariadb';
 $dbUser = getenv('DB_USER') ?: 'watchfolio_user';
 $dbPassword = getenv('DB_PASSWORD') ?: 'watchfolio_pass';
@@ -71,8 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row = $result->fetch_assoc();
         $content_id = ($row['max_id'] ?? 0) + 1;
 
-        // Get logged in user id (for now hardcoded to 1)
-        $created_by_user = 1;
+        $created_by_user = $_SESSION['user_id'] ?? 0;
+        if ($created_by_user === 0) {
+            $errors[] = 'No user selected. Please go back to the homepage and select a user first.';
+        }
 
         // Insert into content
         $stmt1 = $conn->prepare('INSERT INTO content (content_id, title, genre, release_year, created_by_user) VALUES (?, ?, ?, ?, ?)');
