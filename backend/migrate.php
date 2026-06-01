@@ -219,13 +219,18 @@ if (!empty($contentDocs)) {
 echo count($contentDocs) . " content items migrated<br>";
 
 // ============================================
-// ---- 8. Done ----
+// ---- 8. Set migration flag in MongoDB ----
 // ============================================
+$db->config->drop();
+$db->config->insertOne([
+    '_id' => 'migration_status',
+    'migrated' => true,
+    'migrated_at' => date('Y-m-d H:i:s')
+]);
+
+// ---- 9. Done ----
 $sql->close();
-// Note: SQL connection is closed after migration
-// App should now use MongoDB only
 
 echo "<br><strong>Migration complete! 
       MariaDB connection closed. 
       Now using MongoDB only.</strong>";
-?>
