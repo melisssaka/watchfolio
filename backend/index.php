@@ -54,27 +54,16 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
         .btn:hover { background: var(--secondary); color: #333; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-decoration: none; }
         .btn-red { background: var(--danger); }
         .btn-red:hover { background: var(--accent); }
-        .user-bar { background: var(--primary); color: #333; padding: 15px 30px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .user-bar span.brand { font-size: 1.25rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
-        .user-bar form { display: flex; align-items: center; gap: 15px; margin: 0; flex-grow: 1; }
-        .user-bar select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--secondary); background: #fff; font-size: 14px; color: #333; cursor: pointer; }
-        .user-info { display: flex; align-items: center; gap: 8px; font-weight: 500; background: rgba(255,255,255,0.5); padding: 6px 12px; border-radius: 20px; }
-        .header { text-align: center; margin: 40px 0 30px; }
-        .header h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; }
-        .header p { color: #64748b; font-size: 1.1rem; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .review-card { border-left: 4px solid var(--accent); }
-        .review-meta { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; font-size: 0.9rem; color: #64748b; }
-        .review-rating { color: #ff748c; font-weight: bold; font-size: 1.2rem; letter-spacing: 2px; }
         .review-text { font-style: italic; color: #475569; }
         .review-body { display: flex; gap: 20px; align-items: flex-start; margin-top: 15px; }
         .content-cover { width: 100px; height: 150px; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex-shrink: 0; }
         .review-content { flex: 1; }
     </style>
+    <link rel="stylesheet" href="assets/css/pixel-theme.css">
 </head>
 <body>
     <div class="user-bar">
-        <span class="brand">🎬 Watchfolio</span>
+        <span class="brand"><span class="pixel-symbol pixel-movie" aria-hidden="true"></span>Watchfolio</span>
         <form method="POST">
             <label style="color: #555; font-size: 0.95rem;">Acting as:</label>
             <select name="user_id" onchange="this.form.submit()">
@@ -90,7 +79,7 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
             <input type="hidden" name="username" id="username_hidden">
         </form>
         <?php if (isset($_SESSION['username'])): ?>
-            <div class="user-info">👤 <?= htmlspecialchars($_SESSION['username']) ?></div>
+            <div class="user-info"><span class="pixel-symbol pixel-user small" aria-hidden="true"></span><?= htmlspecialchars($_SESSION['username']) ?></div>
         <?php endif; ?>
     </div>
 
@@ -102,27 +91,27 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
 
         <div class="grid">
             <div class="card">
-                <h2>🍃 MongoDB Migration</h2>
+                <h2><span class="pixel-symbol pixel-leaf" aria-hidden="true"></span>MongoDB Migration</h2>
                 <p>Migrate all data from MariaDB to MongoDB. This will clear existing MongoDB data first.</p>
-                <a href="migrate.php" class="btn">🚀 Migrate to MongoDB</a>
+                <a href="migrate.php" class="btn"><span class="pixel-symbol pixel-rocket small" aria-hidden="true"></span>Migrate to MongoDB</a>
             </div>
 
             <div class="card">
-                <h2>📝 Use Cases</h2>
+                <h2><span class="pixel-symbol pixel-note" aria-hidden="true"></span>Use Cases</h2>
                 <p>Manage your portfolio of watched movies and TV shows.</p>
-                <a href="add_movie.php" class="btn">🎬 Add New Movie</a>
+                <a href="add_movie.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Add New Movie</a>
             </div>
 
             <div class="card">
-                <h2>⚙️ Data Setup</h2>
+                <h2><span class="pixel-symbol pixel-gear" aria-hidden="true"></span>Data Setup</h2>
                 <p>Reset and fill the database with randomized data.</p>
-                <a href="generate_database.php" class="btn btn-red">🔄 Generate Data</a>
+                <a href="generate_database.php" class="btn btn-red"><span class="pixel-symbol pixel-refresh small" aria-hidden="true"></span>Generate Data</a>
             </div>
         </div>
 
         <?php if (!empty($latestReviews)): ?>
         <div style="margin-top: 30px; margin-bottom: 10px;">
-            <h2 style="color: var(--primary); font-size: 1.5rem; display: flex; align-items: center; gap: 8px; margin: 0;">⭐ Latest Reviews</h2>
+            <h2 style="color: var(--primary); font-size: 1.5rem; display: flex; align-items: center; gap: 8px; margin: 0;"><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Latest Reviews</h2>
         </div>
         <div class="grid">
             <?php foreach ($latestReviews as $review): ?>
@@ -141,7 +130,11 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
                         <div class="review-content">
                             <div class="review-meta">
                                 <span><strong><?= htmlspecialchars($review['title']) ?></strong><br>reviewed by <?= htmlspecialchars($review['username']) ?></span>
-                                <span class="review-rating"><?= str_repeat('★', $review['rating']) ?><span style="color: #e2e8f0;"><?= str_repeat('★', 5 - $review['rating']) ?></span></span>
+                                <span class="review-rating" aria-label="<?= (int)$review['rating'] ?> out of 5 hearts">
+                                    <?php for ($heart = 1; $heart <= 5; $heart++): ?>
+                                        <span class="pixel-heart <?= $heart > (int)$review['rating'] ? 'empty' : '' ?>" aria-hidden="true"></span>
+                                    <?php endfor; ?>
+                                </span>
                             </div>
                             <p class="review-text">"<?= htmlspecialchars($review['review_text']) ?>"</p>
                         </div>
@@ -161,4 +154,5 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
         hidden.value = opt.getAttribute('data-username') || '';
     });
 </script>
+<script src="assets/js/sparkle-cursor.js"></script>
 </html>

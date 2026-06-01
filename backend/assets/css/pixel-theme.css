@@ -1,0 +1,545 @@
+/* Pixel emoji replacements and review hearts for index.php. */
+.pixel-symbol {
+    --pixel: 3px;
+    width: calc(var(--pixel) * 9);
+    height: calc(var(--pixel) * 9);
+    display: inline-block;
+    flex: 0 0 auto;
+    image-rendering: pixelated;
+    position: relative;
+    vertical-align: -6px;
+}
+.pixel-symbol.small {
+    transform: scale(0.78);
+    transform-origin: left center;
+    margin-right: -4px;
+    vertical-align: -8px;
+}
+.pixel-symbol::before,
+.pixel-symbol::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--pixel);
+    height: var(--pixel);
+    background: transparent;
+}
+.pixel-movie::before {
+    box-shadow:
+        calc(var(--pixel) * 1) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 1) 0 #111,
+        0 calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 8) calc(var(--pixel) * 2) 0 #111,
+        0 calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 8) calc(var(--pixel) * 3) 0 #111,
+        0 calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 8) calc(var(--pixel) * 4) 0 #111,
+        0 calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 8) calc(var(--pixel) * 5) 0 #111,
+        0 calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 8) calc(var(--pixel) * 6) 0 #111;
+}
+.pixel-movie::after {
+    box-shadow:
+        calc(var(--pixel) * 1) calc(var(--pixel) * 2) 0 #ff6d8f,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #ff6d8f,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #ff6d8f,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 2) 0 #ff6d8f,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) 0 #fff,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #fff,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #fff,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #fff,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) 0 #fff,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 5) 0 #d9f4ff,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #d9f4ff,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #d9f4ff,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #d9f4ff,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 5) 0 #d9f4ff;
+}
+.pixel-user::before {
+    box-shadow:
+        calc(var(--pixel) * 3) 0 0 #111,
+        calc(var(--pixel) * 4) 0 0 #111,
+        calc(var(--pixel) * 5) 0 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 7) 0 #111;
+}
+.pixel-user::after {
+    box-shadow:
+        calc(var(--pixel) * 3) calc(var(--pixel) * 1) 0 #ffd4bd,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #ffd4bd,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) 0 #ffd4bd,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #ffd4bd,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #ffd4bd,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #ffd4bd,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #ffc0a8,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #7b66d9,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #7b66d9,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #7b66d9,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 6) 0 #9a8cff,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) 0 #7b66d9,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) 0 #7b66d9,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #7b66d9,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 6) 0 #5a45ba;
+}
+.pixel-leaf::before {
+    box-shadow:
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 7) 0 #111;
+}
+.pixel-leaf::after {
+    box-shadow:
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #8ff58e,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #58dc5f,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #8ff58e,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #58dc5f,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #58dc5f,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) 0 #36b64a,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #58dc5f,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #58dc5f,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #36b64a,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #36b64a,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #36b64a,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #6f4b2b,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 7) 0 #6f4b2b;
+}
+.pixel-rocket::before {
+    box-shadow:
+        calc(var(--pixel) * 4) 0 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 7) 0 #111;
+}
+.pixel-rocket::after {
+    box-shadow:
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #e8322a,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #f2f7ff,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #f2f7ff,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #78c7ff,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #f2f7ff,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) 0 #e8322a,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #f2f7ff,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #f2f7ff,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #d9e5ef,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) 0 #e8322a,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #d9e5ef,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #d9e5ef,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #d9e5ef,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) 0 #ffb11f,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 7) 0 #fff0a8;
+}
+.pixel-note::before {
+    box-shadow:
+        calc(var(--pixel) * 2) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 6) 0 #111;
+}
+.pixel-note::after {
+    box-shadow:
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #fff7fb,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #fff7fb,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #fff7fb,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 2) 0 #f3c3cf,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #fff7fb,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #ffaac7,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #ffaac7,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) 0 #fff7fb,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #fff7fb,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #ffaac7,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #ffaac7,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) 0 #fff7fb,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #fff7fb,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #ffaac7,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #fff7fb,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 5) 0 #f3c3cf;
+}
+.pixel-gear::before {
+    box-shadow:
+        calc(var(--pixel) * 4) calc(var(--pixel) * 0) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 0) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 8) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 8) 0 #111;
+}
+.pixel-gear::after {
+    box-shadow:
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #c8d0dc,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #a8b0bd,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #c8d0dc,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #a8b0bd,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) 0 #a8b0bd,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #c8d0dc,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #fff,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #c8d0dc,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) 0 #7d8794,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) 0 #c8d0dc,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #fff,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #64748b,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #fff,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) 0 #a8b0bd,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 5) 0 #7d8794,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #c8d0dc,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #fff,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #a8b0bd,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 5) 0 #7d8794,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 7) 0 #7d8794;
+}
+.pixel-refresh::before {
+    box-shadow:
+        calc(var(--pixel) * 2) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 6) 0 #111;
+}
+.pixel-refresh::after {
+    box-shadow:
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #35a7ff,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #35a7ff,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #35a7ff,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) 0 #35a7ff,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 2) 0 #fff0a8,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) 0 #35a7ff,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 5) 0 #35a7ff,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 6) 0 #fff0a8,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) 0 #35a7ff,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) 0 #35a7ff,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #35a7ff;
+}
+.pixel-star::before {
+    box-shadow:
+        calc(var(--pixel) * 4) calc(var(--pixel) * 0) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) 0 #111,
+        calc(var(--pixel) * 0) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 1) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 7) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 8) calc(var(--pixel) * 3) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 5) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 6) 0 #111,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 7) 0 #111,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 7) 0 #111;
+}
+.pixel-star::after {
+    box-shadow:
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) 0 #fff0a8,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) 0 #ffc928,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) 0 #ffc928,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) 0 #ffc928,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) 0 #fff0a8,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) 0 #ffc928,
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) 0 #ffc928,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) 0 #ffc928,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) 0 #ffc928,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) 0 #ffb11f,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) 0 #ffc928,
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) 0 #ffc928,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) 0 #ffb11f,
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) 0 #ffb11f,
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) 0 #ffb11f;
+}
+.user-bar { background: var(--primary); color: #333; padding: 15px 30px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+.user-bar span.brand { font-size: 1.25rem; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+.user-bar form { display: flex; align-items: center; gap: 15px; margin: 0; flex-grow: 1; }
+.user-bar select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--secondary); background: #fff; font-size: 14px; color: #333; cursor: pointer; }
+.user-info { display: flex; align-items: center; gap: 8px; font-weight: 500; background: rgba(255,255,255,0.5); padding: 6px 12px; border-radius: 20px; }
+.header { text-align: center; margin: 40px 0 30px; }
+.header h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; }
+.header p { color: #64748b; font-size: 1.1rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.review-card { border-left: 4px solid var(--accent); }
+.review-meta { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; font-size: 0.9rem; color: #64748b; }
+.review-rating { display: flex; align-items: center; gap: 9px; min-height: 28px; }
+.pixel-heart {
+    --pixel: 3px;
+    --heart-outline: #111111;
+    --heart-fill: #e8322a;
+    --heart-shade: #a81821;
+    width: calc(var(--pixel) * 9);
+    height: calc(var(--pixel) * 8);
+    display: inline-block;
+    flex: 0 0 auto;
+    image-rendering: pixelated;
+    position: relative;
+}
+.pixel-heart::before,
+.pixel-heart::after {
+    content: "";
+    position: absolute;
+    width: var(--pixel);
+    height: var(--pixel);
+    left: 0;
+    top: 0;
+}
+.pixel-heart::before {
+    background: transparent;
+    box-shadow:
+        calc(var(--pixel) * 1) 0 var(--heart-outline),
+        calc(var(--pixel) * 2) 0 var(--heart-outline),
+        calc(var(--pixel) * 5) 0 var(--heart-outline),
+        calc(var(--pixel) * 6) 0 var(--heart-outline),
+        0 calc(var(--pixel) * 1) var(--heart-outline),
+        calc(var(--pixel) * 1) calc(var(--pixel) * 1) var(--heart-outline),
+        calc(var(--pixel) * 2) calc(var(--pixel) * 1) var(--heart-outline),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 1) var(--heart-outline),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 1) var(--heart-outline),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) var(--heart-outline),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 1) var(--heart-outline),
+        calc(var(--pixel) * 7) calc(var(--pixel) * 1) var(--heart-outline),
+        0 calc(var(--pixel) * 2) var(--heart-outline),
+        calc(var(--pixel) * 1) calc(var(--pixel) * 2) var(--heart-outline),
+        calc(var(--pixel) * 2) calc(var(--pixel) * 2) var(--heart-outline),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) var(--heart-outline),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) var(--heart-outline),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) var(--heart-outline),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 2) var(--heart-outline),
+        calc(var(--pixel) * 7) calc(var(--pixel) * 2) var(--heart-outline),
+        calc(var(--pixel) * 8) calc(var(--pixel) * 2) var(--heart-outline),
+        0 calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 1) calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 7) calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 8) calc(var(--pixel) * 3) var(--heart-outline),
+        calc(var(--pixel) * 1) calc(var(--pixel) * 4) var(--heart-outline),
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) var(--heart-outline),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) var(--heart-outline),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) var(--heart-outline),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) var(--heart-outline),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) var(--heart-outline),
+        calc(var(--pixel) * 7) calc(var(--pixel) * 4) var(--heart-outline),
+        calc(var(--pixel) * 2) calc(var(--pixel) * 5) var(--heart-outline),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) var(--heart-outline),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) var(--heart-outline),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) var(--heart-outline),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 5) var(--heart-outline),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 6) var(--heart-outline),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) var(--heart-outline),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 6) var(--heart-outline),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 7) var(--heart-outline);
+}
+.pixel-heart::after {
+    background: transparent;
+    box-shadow:
+        calc(var(--pixel) * 1) calc(var(--pixel) * 1) #ffffff,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 1) var(--heart-fill),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 1) var(--heart-fill),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 1) var(--heart-fill),
+        calc(var(--pixel) * 1) calc(var(--pixel) * 2) var(--heart-fill),
+        calc(var(--pixel) * 2) calc(var(--pixel) * 2) var(--heart-fill),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 2) var(--heart-fill),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 2) var(--heart-fill),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 2) var(--heart-fill),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 2) var(--heart-fill),
+        calc(var(--pixel) * 7) calc(var(--pixel) * 2) var(--heart-fill),
+        calc(var(--pixel) * 1) calc(var(--pixel) * 3) #ffffff,
+        calc(var(--pixel) * 2) calc(var(--pixel) * 3) var(--heart-fill),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 3) var(--heart-fill),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 3) var(--heart-fill),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 3) var(--heart-fill),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 3) var(--heart-fill),
+        calc(var(--pixel) * 7) calc(var(--pixel) * 3) var(--heart-fill),
+        calc(var(--pixel) * 2) calc(var(--pixel) * 4) var(--heart-fill),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 4) var(--heart-fill),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 4) var(--heart-fill),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 4) var(--heart-fill),
+        calc(var(--pixel) * 6) calc(var(--pixel) * 4) var(--heart-shade),
+        calc(var(--pixel) * 3) calc(var(--pixel) * 5) var(--heart-fill),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 5) var(--heart-fill),
+        calc(var(--pixel) * 5) calc(var(--pixel) * 5) var(--heart-shade),
+        calc(var(--pixel) * 4) calc(var(--pixel) * 6) var(--heart-shade);
+}
+.pixel-heart.empty {
+    --heart-outline: #f0a9c1;
+    --heart-fill: #ffdce8;
+    --heart-shade: #f6bfd1;
+    opacity: 0.75;
+}
+.pixel-heart.empty::after { box-shadow:
+    calc(var(--pixel) * 2) calc(var(--pixel) * 1) var(--heart-fill),
+    calc(var(--pixel) * 5) calc(var(--pixel) * 1) var(--heart-fill),
+    calc(var(--pixel) * 6) calc(var(--pixel) * 1) var(--heart-fill),
+    calc(var(--pixel) * 1) calc(var(--pixel) * 2) var(--heart-fill),
+    calc(var(--pixel) * 2) calc(var(--pixel) * 2) var(--heart-fill),
+    calc(var(--pixel) * 3) calc(var(--pixel) * 2) var(--heart-fill),
+    calc(var(--pixel) * 4) calc(var(--pixel) * 2) var(--heart-fill),
+    calc(var(--pixel) * 5) calc(var(--pixel) * 2) var(--heart-fill),
+    calc(var(--pixel) * 6) calc(var(--pixel) * 2) var(--heart-fill),
+    calc(var(--pixel) * 7) calc(var(--pixel) * 2) var(--heart-fill),
+    calc(var(--pixel) * 1) calc(var(--pixel) * 3) var(--heart-fill),
+    calc(var(--pixel) * 2) calc(var(--pixel) * 3) var(--heart-fill),
+    calc(var(--pixel) * 3) calc(var(--pixel) * 3) var(--heart-fill),
+    calc(var(--pixel) * 4) calc(var(--pixel) * 3) var(--heart-fill),
+    calc(var(--pixel) * 5) calc(var(--pixel) * 3) var(--heart-fill),
+    calc(var(--pixel) * 6) calc(var(--pixel) * 3) var(--heart-fill),
+    calc(var(--pixel) * 7) calc(var(--pixel) * 3) var(--heart-fill),
+    calc(var(--pixel) * 2) calc(var(--pixel) * 4) var(--heart-fill),
+    calc(var(--pixel) * 3) calc(var(--pixel) * 4) var(--heart-fill),
+    calc(var(--pixel) * 4) calc(var(--pixel) * 4) var(--heart-fill),
+    calc(var(--pixel) * 5) calc(var(--pixel) * 4) var(--heart-fill),
+    calc(var(--pixel) * 6) calc(var(--pixel) * 4) var(--heart-shade),
+    calc(var(--pixel) * 3) calc(var(--pixel) * 5) var(--heart-fill),
+    calc(var(--pixel) * 4) calc(var(--pixel) * 5) var(--heart-fill),
+    calc(var(--pixel) * 5) calc(var(--pixel) * 5) var(--heart-shade),
+    calc(var(--pixel) * 4) calc(var(--pixel) * 6) var(--heart-shade);
+}
