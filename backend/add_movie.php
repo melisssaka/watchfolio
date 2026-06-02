@@ -120,98 +120,130 @@ $report = $conn->query('
 <html>
 <head>
     <title>Add New Movie - Watchfolio</title>
+    <link rel="stylesheet" href="assets/css/pixel-theme.css">
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-        .error { color: red; background: #ffe0e0; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        .success { color: green; background: #e0ffe0; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input, select { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
-        button { margin-top: 20px; padding: 10px 20px; background: #333; color: white; border: none; cursor: pointer; border-radius: 5px; }
-        button:hover { background: #555; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background: #333; color: white; }
-        tr:nth-child(even) { background: #f9f9f9; }
-        nav { margin-bottom: 20px; }
-        nav a { margin-right: 15px; color: #333; }
+        :root { --primary: #ffaac7; --secondary: #e9c3d5; --accent: #f3c3cf; --danger: #ffc9e6; --bg: #fbd6ee; --card-bg: #ffffff; --text: #333333; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .card h2 { margin-top: 0; color: var(--primary); font-size: 1.5rem; display: flex; align-items: center; gap: 8px; }
+        a { color: var(--primary); text-decoration: none; font-weight: 500; }
+        a:hover { text-decoration: underline; }
+        .btn, button { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--primary); color: #333; border-radius: 8px; border: none; margin-top: 12px; transition: all 0.2s ease; text-decoration: none; font-weight: 500; cursor: pointer; }
+        .btn:hover, button:hover { background: var(--secondary); color: #333; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-decoration: none; }
+        label { display: block; margin-top: 14px; font-weight: 700; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 6px; border-radius: 8px; border: 1px solid var(--secondary); box-sizing: border-box; font-size: 15px; }
+        textarea { min-height: 130px; resize: vertical; }
+        .success { background: #e8ffe8; color: #166534; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .error { background: #ffe8ee; color: #9f1239; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .error ul { margin: 10px 0 0 0; padding-left: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
+        th { background: var(--primary); }
+        .header { text-align: center; margin: 40px 0 30px; }
+        .header h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; }
     </style>
 </head>
 <body>
-    <nav><a href="index.php">🎬 Home</a></nav>
-    <h1>Add New Movie</h1>
+    <div class="user-bar">
+        <span class="brand"><span class="pixel-symbol pixel-movie" aria-hidden="true"></span>Add New Movie</span>
+        
+        <?php if (isset($_SESSION['username'])): ?>
+            <div class="user-info"><span class="pixel-symbol pixel-user small" aria-hidden="true"></span><?= htmlspecialchars($_SESSION['username']) ?></div>
+        <?php endif; ?>
+    </div>
 
-    <?php if (!empty($errors)): ?>
-        <div class="error">
-            <strong>Please fix the following errors:</strong>
-            <ul>
-                <?php foreach ($errors as $e): ?>
-                    <li><?= htmlspecialchars($e) ?></li>
-                <?php endforeach; ?>
-            </ul>
+    <div class="container">
+        <div class="header">
+            <h1>Add New Movie</h1>
+            <p>Add a new movie to the Watchfolio database.</p>
         </div>
-    <?php endif; ?>
+        
+        <div class="card">
+            <?php if (!empty($errors)): ?>
+                <div class="error">
+                    <strong>Please fix the following errors:</strong>
+                    <ul>
+                        <?php foreach ($errors as $e): ?>
+                            <li><?= htmlspecialchars($e) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
 
-    <?php if ($success): ?>
-        <div class="success"><?= htmlspecialchars($success) ?></div>
-    <?php endif; ?>
+            <?php if ($success): ?>
+                <div class="success"><?= htmlspecialchars($success) ?></div>
+            <?php endif; ?>
 
-    <form method="POST">
-        <h2>Content Details</h2>
-        <label>Title *</label>
-        <input type="text" name="title" value="<?= htmlspecialchars($_POST['title'] ?? '') ?>" placeholder="e.g. Oppenheimer">
+            <form method="POST">
+                <h2><span class="pixel-symbol pixel-note" aria-hidden="true"></span>Content Details</h2>
+                <label>Title *</label>
+                <input type="text" name="title" value="<?= htmlspecialchars($_POST['title'] ?? '') ?>" placeholder="e.g. Oppenheimer">
 
-        <label>Genre *</label>
-        <input type="text" name="genre" value="<?= htmlspecialchars($_POST['genre'] ?? '') ?>" placeholder="e.g. Drama">
+                <label>Genre *</label>
+                <input type="text" name="genre" value="<?= htmlspecialchars($_POST['genre'] ?? '') ?>" placeholder="e.g. Drama">
 
-        <label>Release Year *</label>
-        <input type="number" name="release_year" value="<?= htmlspecialchars($_POST['release_year'] ?? '') ?>" placeholder="e.g. 2023" min="1888" max="2100">
+                <label>Release Year *</label>
+                <input type="number" name="release_year" value="<?= htmlspecialchars($_POST['release_year'] ?? '') ?>" placeholder="e.g. 2023" min="1888" max="2100">
 
-        <h2>Movie Details</h2>
-        <label>Duration (minutes) *</label>
-        <input type="number" name="duration" value="<?= htmlspecialchars($_POST['duration'] ?? '') ?>" placeholder="e.g. 180" min="1">
+                <h2 style="margin-top: 25px;"><span class="pixel-symbol pixel-movie" aria-hidden="true"></span>Movie Details</h2>
+                <label>Duration (minutes) *</label>
+                <input type="number" name="duration" value="<?= htmlspecialchars($_POST['duration'] ?? '') ?>" placeholder="e.g. 180" min="1">
 
-        <label>Box Office ($) *</label>
-        <input type="number" name="box_office" value="<?= htmlspecialchars($_POST['box_office'] ?? '') ?>" placeholder="e.g. 952000000" min="0">
+                <label>Box Office ($) *</label>
+                <input type="number" name="box_office" value="<?= htmlspecialchars($_POST['box_office'] ?? '') ?>" placeholder="e.g. 952000000" min="0">
 
-        <h2>Director</h2>
-        <label>Select Director *</label>
-        <select name="director_id">
-            <option value="">-- Select a Director --</option>
-            <?php while ($dir = $directors->fetch_assoc()): ?>
-                <option value="<?= $dir['director_id'] ?>"
-                    <?= (isset($_POST['director_id']) && $_POST['director_id'] == $dir['director_id']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($dir['name']) ?> (<?= htmlspecialchars($dir['nationality']) ?>)
-                </option>
-            <?php endwhile; ?>
-        </select>
+                <h2 style="margin-top: 25px;"><span class="pixel-symbol pixel-user" aria-hidden="true"></span>Director</h2>
+                <label>Select Director *</label>
+                <select name="director_id">
+                    <option value="">-- Select a Director --</option>
+                    <?php while ($dir = $directors->fetch_assoc()): ?>
+                        <option value="<?= $dir['director_id'] ?>"
+                            <?= (isset($_POST['director_id']) && $_POST['director_id'] == $dir['director_id']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($dir['name']) ?> (<?= htmlspecialchars($dir['nationality']) ?>)
+                        </option>
+                    <?php endwhile; ?>
+                </select>
 
-        <button type="submit">💾 Save Movie</button>
-    </form>
+                <button type="submit">
+                    <span class="pixel-symbol pixel-star small" aria-hidden="true"></span>
+                    Save Movie
+                </button>
+            </form>
+        </div>
 
-    <hr style="margin-top: 40px;">
-    <h2>📊 Analytics Report: Drama Directors by Movie Count</h2>
-    <p>Directors who have directed Drama movies, ranked by total number of Drama films.</p>
+        <div class="card">
+            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics Report: Drama Directors by Movie Count</h2>
+            <p>Directors who have directed Drama movies, ranked by total number of Drama films.</p>
 
-    <?php if ($report && $report->num_rows > 0): ?>
-        <table>
-            <tr>
-                <th>Director</th>
-                <th>Nationality</th>
-                <th>Genre</th>
-                <th>Total Movies</th>
-            </tr>
-            <?php while ($row = $report->fetch_assoc()): ?>
-                <tr>
-                    <td><?= htmlspecialchars($row['director_name']) ?></td>
-                    <td><?= htmlspecialchars($row['nationality']) ?></td>
-                    <td><?= htmlspecialchars($row['genre']) ?></td>
-                    <td><?= $row['total_movies'] ?></td>
-                </tr>
-            <?php endwhile; ?>
-        </table>
-    <?php else: ?>
-        <p>No Drama movies in the database yet. Add some movies to see the report!</p>
-    <?php endif; ?>
+            <?php if ($report && $report->num_rows > 0): ?>
+                <table>
+                    <tr>
+                        <th>Director</th>
+                        <th>Nationality</th>
+                        <th>Genre</th>
+                        <th>Total Movies</th>
+                    </tr>
+                    <?php while ($row = $report->fetch_assoc()): ?>
+                        <tr>
+                            <td><?= htmlspecialchars($row['director_name']) ?></td>
+                            <td><?= htmlspecialchars($row['nationality']) ?></td>
+                            <td><?= htmlspecialchars($row['genre']) ?></td>
+                            <td><?= $row['total_movies'] ?></td>
+                        </tr>
+                    <?php endwhile; ?>
+                </table>
+            <?php else: ?>
+                <p>No Drama movies in the database yet. Add some movies to see the report!</p>
+            <?php endif; ?>
+        </div>
 
+        <a href="index.php" class="btn">
+            <span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>
+            Return to Homepage
+        </a>
+    </div>
+
+    <script src="assets/js/sparkle-cursor.js"></script>
 </body>
 </html>
