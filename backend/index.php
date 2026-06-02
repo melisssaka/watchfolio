@@ -140,7 +140,8 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
                 <h2><span class="pixel-symbol pixel-note" aria-hidden="true"></span>Use Cases</h2>
                 <p>Manage your portfolio of watched movies and TV shows.</p>
                 <a href="add_movie.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Add New Movie</a>
-                <a href="add_review.php" class="btn"><span class="pixel-symbol pixel-note small" aria-hidden="true"></span>Add Review</a>
+                <a href="add_review.php" class="btn"><span class="pixel-symbol pixel-note small" aria-hidden="true"></span>Add Review SQL</a>
+                <a href="add_review_mongo.php" class="btn"><span class="pixel-symbol pixel-leaf small" aria-hidden="true"></span>Add Review MongoDB</a>
             </div>
 
             <div class="card">
