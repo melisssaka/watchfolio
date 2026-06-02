@@ -1,6 +1,38 @@
 <?php
 session_start();
 
+$mongoStatus = [
+    'migrated' => false,
+    'migrated_at' => null
+];
+
+try {
+    $autoloadPath = __DIR__ . '/vendor/autoload.php';
+
+    if (!file_exists($autoloadPath)) {
+        throw new Exception('MongoDB dependencies are not installed yet.');
+    }
+
+    require_once $autoloadPath;
+
+    $mongoHost = getenv('MONGO_HOST') ?: 'mongodb';
+    $mongoPort = getenv('MONGO_PORT') ?: '27017';
+
+    $mongo = new MongoDB\Client("mongodb://$mongoHost:$mongoPort");
+    $mongodb = $mongo->watchfolio_db;
+
+    $migrationStatus = $mongodb->config->findOne([
+        '_id' => 'migration_status'
+    ]);
+
+    if ($migrationStatus && !empty($migrationStatus['migrated'])) {
+        $mongoStatus['migrated'] = true;
+        $mongoStatus['migrated_at'] = $migrationStatus['migrated_at'] ?? null;
+    }
+} catch (Exception $e) {
+    $mongoStatus['error'] = $e->getMessage();
+}
+
 $dbHost = getenv('DB_HOST') ?: 'mariadb';
 $dbUser = getenv('DB_USER') ?: 'watchfolio_user';
 $dbPassword = getenv('DB_PASSWORD') ?: 'watchfolio_pass';
@@ -93,6 +125,14 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
             <div class="card">
                 <h2><span class="pixel-symbol pixel-leaf" aria-hidden="true"></span>MongoDB Migration</h2>
                 <p>Migrate all data from MariaDB to MongoDB. This will clear existing MongoDB data first.</p>
+                <?php if (!empty($mongoStatus['error'])): ?>
+                    <p><strong>Status:</strong> MongoDB status could not be loaded.</p>
+                <?php elseif ($mongoStatus['migrated']): ?>
+                    <p><strong>Status:</strong> Migrated</p>
+                    <p><strong>Migrated at:</strong> <?= htmlspecialchars($mongoStatus['migrated_at']) ?></p>
+                <?php else: ?>
+                    <p><strong>Status:</strong> Not migrated yet</p>
+                <?php endif; ?>
                 <a href="migrate.php" class="btn"><span class="pixel-symbol pixel-rocket small" aria-hidden="true"></span>Migrate to MongoDB</a>
             </div>
 
@@ -100,6 +140,7 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
                 <h2><span class="pixel-symbol pixel-note" aria-hidden="true"></span>Use Cases</h2>
                 <p>Manage your portfolio of watched movies and TV shows.</p>
                 <a href="add_movie.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Add New Movie</a>
+                <a href="add_review.php" class="btn"><span class="pixel-symbol pixel-note small" aria-hidden="true"></span>Add Review</a>
             </div>
 
             <div class="card">

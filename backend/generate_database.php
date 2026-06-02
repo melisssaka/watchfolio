@@ -14,8 +14,63 @@ if ($conn->connect_error) {
 function runQuery(mysqli $conn, string $sql, string $message): void
 {
     if (!$conn->query($sql)) {
-        die($message . ': ' . $conn->error);
+        renderResultPage(
+            'Database generation failed',
+            [
+                $message . ': ' . $conn->error
+            ],
+            true
+        );
+        exit;
     }
+}
+
+function renderResultPage(string $title, array $messages, bool $isError = false): void
+{
+    $iconClass = $isError ? 'pixel-gear' : 'pixel-heart';
+    $cardClass = $isError ? 'result-card error-card' : 'result-card';
+    ?>
+<!DOCTYPE html>
+<html>
+<head>
+    <title><?= htmlspecialchars($title) ?> - Watchfolio</title>
+    <link rel="stylesheet" href="assets/css/pixel-theme.css">
+    <style>
+        :root { --primary: #ffaac7; --secondary: #e9c3d5; --accent: #f3c3cf; --danger: #ffc9e6; --bg: #fbd6ee; --card-bg: #ffffff; --text: #333333; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .card h1 { margin-top: 0; color: var(--primary); font-size: 2rem; display: flex; align-items: center; gap: 10px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: var(--primary); color: #333; border-radius: 8px; margin-top: 18px; transition: all 0.2s ease; text-decoration: none; font-weight: 500; }
+        .btn:hover { background: var(--secondary); color: #333; transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-decoration: none; }
+        .result-card { border-left: 6px solid var(--primary); }
+        .error-card { border-left-color: var(--danger); }
+        .result-list { margin: 18px 0 0; padding: 0; list-style: none; }
+        .result-list li { align-items: center; display: flex; gap: 10px; margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="user-bar">
+        <span class="brand"><span class="pixel-symbol pixel-refresh" aria-hidden="true"></span>Watchfolio</span>
+        <a href="index.php" class="btn">Back Home</a>
+    </div>
+
+    <div class="container">
+        <div class="<?= $cardClass ?>">
+            <h1><span class="pixel-symbol <?= $iconClass ?>" aria-hidden="true"></span><?= htmlspecialchars($title) ?></h1>
+            <ul class="result-list">
+                <?php foreach ($messages as $message): ?>
+                    <li><span class="pixel-heart" aria-hidden="true"></span><?= htmlspecialchars($message) ?></li>
+                <?php endforeach; ?>
+            </ul>
+            <a href="index.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Return to Homepage</a>
+        </div>
+    </div>
+
+    <script src="assets/js/sparkle-cursor.js"></script>
+</body>
+</html>
+    <?php
 }
 
 function randomName(array $firstNames, array $lastNames): string
@@ -462,16 +517,20 @@ for ($i = 91; $i <= 100; $i++) {
     $stmt->close();
 }
 
-echo '<h2>Success!</h2>';
-echo 'Existing SQL data deleted.<br>';
-echo '20 users generated.<br>';
-echo '10 directors generated.<br>';
-echo '20 actors generated.<br>';
-echo '40 content items generated.<br>';
-echo '20 movies generated.<br>';
-echo '20 TV shows generated.<br>';
-echo '100 reviews generated.<br>';
-echo '40 actor-content relationships generated.<br>';
-echo '35 TV show-director relationships generated.<br>';
+renderResultPage(
+    'Success!',
+    [
+        'Existing SQL data deleted.',
+        '20 users generated.',
+        '10 directors generated.',
+        '20 actors generated.',
+        '40 content items generated.',
+        '20 movies generated.',
+        '20 TV shows generated.',
+        '100 reviews generated.',
+        '40 actor-content relationships generated.',
+        '35 TV show-director relationships generated.'
+    ]
+);
 
 $conn->close();
