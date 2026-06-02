@@ -9,6 +9,7 @@ services:
       - mongodb
     volumes:
       - ./backend:/var/www/html
+      - app_vendor:/var/www/html/vendor
 
   mariadb:
     image: mariadb:10.11
@@ -33,3 +34,4 @@ services:
 volumes:
   mariadb_data:
   mongodb_data:
+  app_vendor:
