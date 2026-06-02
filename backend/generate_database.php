@@ -52,7 +52,6 @@ function renderResultPage(string $title, array $messages, bool $isError = false)
 <body>
     <div class="user-bar">
         <span class="brand"><span class="pixel-symbol pixel-refresh" aria-hidden="true"></span>Watchfolio</span>
-        <a href="index.php" class="btn">Back Home</a>
     </div>
 
     <div class="container">

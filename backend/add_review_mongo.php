@@ -43,11 +43,11 @@ try {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isMigrated && $mongodb) {
     $userId = (int) $_SESSION['user_id'];
     $username = $_SESSION['username'] ?? ('username' . $userId);
-    $contentId = (int) ($_POST['content_id'] ?? 0);
+    $contentId = trim($_POST['content_id'] ?? '');
     $rating = (int) ($_POST['rating'] ?? 0);
     $reviewText = trim($_POST['review_text'] ?? '');
 
-    if ($contentId <= 0) {
+    if ($contentId === '') {
         $errors[] = 'Please select a movie or TV show.';
     }
 
@@ -85,7 +85,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
 
         $updateResult = $mongodb->content->updateOne(
             [
-                '_id' => $contentId
+                '_id' => [
+                    '$in' => [
+                        $contentId,
+                        (int) $contentId
+                    ]
+                ]
             ],
             [
                 '$push' => [
@@ -283,7 +288,7 @@ if ($isMigrated && $mongodb) {
                     <select name="content_id">
                         <option value="">-- Select content --</option>
                         <?php foreach ($contentItems as $content): ?>
-                            <option value="<?= (int) $content['_id'] ?>" <?= (isset($_POST['content_id']) && (int) $_POST['content_id'] === (int) $content['_id']) ? 'selected' : '' ?>>
+                            <option value="<?= htmlspecialchars((string) $content['_id']) ?>" <?= (isset($_POST['content_id']) && (string) $_POST['content_id'] === (string) $content['_id']) ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($content['type']) ?>:
                                 <?= htmlspecialchars($content['title']) ?>
                                 (<?= htmlspecialchars($content['genre']) ?>, <?= (int) $content['release_year'] ?>)
