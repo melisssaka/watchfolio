@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/db_mode.php';
 
 $mongoStatus = [
     'migrated'    => false,
@@ -48,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
 $users         = [];
 $latestReviews = [];
 
-if ($mongoStatus['migrated'] && $mongodb !== null) {
+if (is_mongo_mode() && $mongodb !== null) {
     // ---- Query users from MongoDB ----
     $userCursor = $mongodb->app_user->find(
         [],
@@ -181,9 +182,11 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
                 <?php endif; ?>
                 <?php if (!empty($mongoStatus['error'])): ?>
                     <p><strong>Status:</strong> MongoDB status could not be loaded.</p>
-                <?php elseif ($mongoStatus['migrated']): ?>
+                <?php elseif (is_mongo_mode()): ?>
                     <p><strong>Status:</strong> Migrated (querying MongoDB)</p>
-                    <p><strong>Migrated at:</strong> <?= htmlspecialchars($mongoStatus['migrated_at']) ?></p>
+                    <?php if ($mongoStatus['migrated_at']): ?>
+                        <p><strong>Migrated at:</strong> <?= htmlspecialchars($mongoStatus['migrated_at']) ?></p>
+                    <?php endif; ?>
                 <?php else: ?>
                     <p><strong>Status:</strong> Not migrated yet (querying MariaDB)</p>
                 <?php endif; ?>

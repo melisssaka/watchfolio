@@ -211,6 +211,26 @@ $reviewReplyTexts = [
     'I think nostalgia is influencing your opinion a bit.'
 ];
 
+// ---- If MongoDB mode: clear all MongoDB data and reset flag to SQL ----
+require_once __DIR__ . '/db_mode.php';
+if (is_mongo_mode()) {
+    require_once __DIR__ . '/vendor/autoload.php';
+    try {
+        $mongoHost = getenv('MONGO_HOST') ?: 'mongodb';
+        $mongoPort = getenv('MONGO_PORT') ?: '27017';
+        $mongoClient = new MongoDB\Client("mongodb://$mongoHost:$mongoPort");
+        $mongoDb = $mongoClient->watchfolio_db;
+        $mongoDb->app_user->drop();
+        $mongoDb->director->drop();
+        $mongoDb->actor->drop();
+        $mongoDb->content->drop();
+        $mongoDb->config->drop();
+    } catch (Exception $e) {
+        // Non-fatal: continue and reset flag regardless
+    }
+    set_db_mode('sql');
+}
+
 runQuery($conn, 'SET FOREIGN_KEY_CHECKS = 0', 'Could not disable foreign key checks');
 runQuery($conn, 'TRUNCATE TABLE actor_content', 'Could not empty actor_content');
 runQuery($conn, 'TRUNCATE TABLE tv_shows_directors', 'Could not empty tv_shows_directors');

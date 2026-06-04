@@ -3,6 +3,7 @@
 // migrate.php – Migrates all data from MariaDB to MongoDB
 // ============================================
 ob_start();
+require_once __DIR__ . '/db_mode.php';
 
 // ---- 1. Connect to MariaDB ----
 $dbHost     = getenv('DB_HOST')     ?: 'mariadb';
@@ -207,6 +208,7 @@ $db->config->insertOne([
 ]);
 
 $sql->close();
+set_db_mode('mongodb');
 ob_end_clean();
 
 // Redirect back with summary in session
