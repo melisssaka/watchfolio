@@ -196,12 +196,15 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
             <div class="card">
                 <h2><span class="pixel-symbol pixel-note" aria-hidden="true"></span>Use Cases</h2>
                 <p>Manage your portfolio of watched movies and TV shows.</p>
-                <a href="add_movie.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Add New Movie</a>
-                <a href="add_review.php" class="btn"><span class="pixel-symbol pixel-note small" aria-hidden="true"></span>Add Review SQL</a>
-                <a href="add_review_mongo.php" class="btn"><span class="pixel-symbol pixel-leaf small" aria-hidden="true"></span>Add Review MongoDB</a>
-                <a href="add_movie_mongo.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Add Movie MongoDB</a>
-                <a href="assign_actor.php" class="btn"><span class="pixel-symbol pixel-user small" aria-hidden="true"></span>Assign Actor SQL</a>
-                <a href="assign_actor_mongo.php" class="btn"><span class="pixel-symbol pixel-leaf small" aria-hidden="true"></span>Assign Actor MongoDB</a>
+                <?php if (is_mongo_mode()): ?>
+                    <a href="add_movie_mongo.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Add Movie MongoDB</a>
+                    <a href="add_review_mongo.php" class="btn"><span class="pixel-symbol pixel-leaf small" aria-hidden="true"></span>Add Review MongoDB</a>
+                    <a href="assign_actor_mongo.php" class="btn"><span class="pixel-symbol pixel-leaf small" aria-hidden="true"></span>Assign Actor MongoDB</a>
+                <?php else: ?>
+                    <a href="add_movie.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Add New Movie</a>
+                    <a href="add_review.php" class="btn"><span class="pixel-symbol pixel-note small" aria-hidden="true"></span>Add Review SQL</a>
+                    <a href="assign_actor.php" class="btn"><span class="pixel-symbol pixel-user small" aria-hidden="true"></span>Assign Actor SQL</a>
+                <?php endif; ?>
             </div>
 
             <div class="card">
