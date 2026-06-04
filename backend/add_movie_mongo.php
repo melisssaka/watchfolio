@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
 
 // Fetch directors for dropdown
 if ($isMigrated && $mongodb) {
-    $directors = $mongodb->directors->find([], ['sort' => ['name' => 1]]);
+    $directors = $mongodb->director->find([], ['sort' => ['name' => 1]]);
 
     // Analytics report: Drama directors ranked by movie count in MongoDB
    $reportResult = $mongodb->content->aggregate([
