@@ -2,65 +2,113 @@
 session_start();
 
 $mongoStatus = [
-    'migrated' => false,
-    'migrated_at' => null
+    'migrated'    => false,
+    'migrated_at' => null,
 ];
+$mongodb = null;
+
+$migrateMessage = null;
+$migrateError   = null;
+if (!empty($_SESSION['migrate_success'])) {
+    $migrateMessage = $_SESSION['migrate_success'];
+    unset($_SESSION['migrate_success']);
+}
+if (!empty($_SESSION['migrate_error'])) {
+    $migrateError = $_SESSION['migrate_error'];
+    unset($_SESSION['migrate_error']);
+}
 
 try {
     $autoloadPath = __DIR__ . '/vendor/autoload.php';
-
     if (!file_exists($autoloadPath)) {
         throw new Exception('MongoDB dependencies are not installed yet.');
     }
-
     require_once $autoloadPath;
 
     $mongoHost = getenv('MONGO_HOST') ?: 'mongodb';
     $mongoPort = getenv('MONGO_PORT') ?: '27017';
 
-    $mongo = new MongoDB\Client("mongodb://$mongoHost:$mongoPort");
+    $mongo   = new MongoDB\Client("mongodb://$mongoHost:$mongoPort");
     $mongodb = $mongo->watchfolio_db;
 
-    $migrationStatus = $mongodb->config->findOne([
-        '_id' => 'migration_status'
-    ]);
-
+    $migrationStatus = $mongodb->config->findOne(['_id' => 'migration_status']);
     if ($migrationStatus && !empty($migrationStatus['migrated'])) {
-        $mongoStatus['migrated'] = true;
+        $mongoStatus['migrated']    = true;
         $mongoStatus['migrated_at'] = $migrationStatus['migrated_at'] ?? null;
     }
 } catch (Exception $e) {
     $mongoStatus['error'] = $e->getMessage();
 }
 
-$dbHost = getenv('DB_HOST') ?: 'mariadb';
-$dbUser = getenv('DB_USER') ?: 'watchfolio_user';
-$dbPassword = getenv('DB_PASSWORD') ?: 'watchfolio_pass';
-$dbName = getenv('DB_NAME') ?: 'watchfolio';
-
-$conn = new mysqli($dbHost, $dbUser, $dbPassword, $dbName);
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id'])) {
-    $_SESSION['user_id'] = (int)$_POST['user_id'];
-    $_SESSION['username'] = $_POST['username'];
+    $_SESSION['user_id']   = (int)$_POST['user_id'];
+    $_SESSION['username']  = $_POST['username'];
 }
 
-$users = $conn->query('SELECT user_id, username FROM app_user ORDER BY username');
-
-// Fetch the latest reviews
-$latestReviewsQuery = $conn->query('
-    SELECT r.review_text, r.rating, u.username, c.title, c.content_id
-    FROM review r
-    JOIN app_user u ON r.user_id = u.user_id
-    JOIN content c ON r.content_id = c.content_id
-    WHERE r.review_number <= 90
-    ORDER BY RAND()
-    LIMIT 4
-');
+$users         = [];
 $latestReviews = [];
-if ($latestReviewsQuery) {
-    while ($row = $latestReviewsQuery->fetch_assoc()) {
-        $latestReviews[] = $row;
+
+if ($mongoStatus['migrated'] && $mongodb !== null) {
+    // ---- Query users from MongoDB ----
+    $userCursor = $mongodb->app_user->find(
+        [],
+        ['sort' => ['username' => 1], 'projection' => ['_id' => 1, 'username' => 1]]
+    );
+    foreach ($userCursor as $u) {
+        $users[] = ['user_id' => $u['_id'], 'username' => (string)$u['username']];
+    }
+
+    // ---- Query latest reviews from MongoDB via aggregation ----
+    $pipeline = [
+        ['$unwind' => '$reviews'],
+        ['$match'  => ['reviews.review_number' => ['$lte' => 90]]],
+        ['$sample' => ['size' => 4]],
+        ['$project' => [
+            'review_text' => '$reviews.review_text',
+            'rating'      => '$reviews.rating',
+            'username'    => '$reviews.username',
+            'title'       => '$title',
+            'content_id'  => '$_id',
+        ]],
+    ];
+    foreach ($mongodb->content->aggregate($pipeline) as $r) {
+        $latestReviews[] = [
+            'review_text' => (string)$r['review_text'],
+            'rating'      => (int)$r['rating'],
+            'username'    => (string)$r['username'],
+            'title'       => (string)$r['title'],
+            'content_id'  => $r['content_id'],
+        ];
+    }
+} else {
+    // ---- Query from MariaDB ----
+    $dbHost     = getenv('DB_HOST')     ?: 'mariadb';
+    $dbUser     = getenv('DB_USER')     ?: 'watchfolio_user';
+    $dbPassword = getenv('DB_PASSWORD') ?: 'watchfolio_pass';
+    $dbName     = getenv('DB_NAME')     ?: 'watchfolio';
+
+    $conn = new mysqli($dbHost, $dbUser, $dbPassword, $dbName);
+
+    $userResult = $conn->query('SELECT user_id, username FROM app_user ORDER BY username');
+    if ($userResult) {
+        while ($u = $userResult->fetch_assoc()) {
+            $users[] = $u;
+        }
+    }
+
+    $reviewResult = $conn->query('
+        SELECT r.review_text, r.rating, u.username, c.title, c.content_id
+        FROM review r
+        JOIN app_user u ON r.user_id = u.user_id
+        JOIN content c ON r.content_id = c.content_id
+        WHERE r.review_number <= 90
+        ORDER BY RAND()
+        LIMIT 4
+    ');
+    if ($reviewResult) {
+        while ($row = $reviewResult->fetch_assoc()) {
+            $latestReviews[] = $row;
+        }
     }
 }
 
@@ -100,13 +148,13 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
             <label style="color: #555; font-size: 0.95rem;">Acting as:</label>
             <select name="user_id" onchange="this.form.submit()">
                 <option value="">-- Select User --</option>
-                <?php while ($user = $users->fetch_assoc()): ?>
+                <?php foreach ($users as $user): ?>
                     <option value="<?= $user['user_id'] ?>"
                         data-username="<?= htmlspecialchars($user['username']) ?>"
                         <?= (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user['user_id']) ? 'selected' : '' ?>>
                         <?= htmlspecialchars($user['username']) ?>
                     </option>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             </select>
             <input type="hidden" name="username" id="username_hidden">
         </form>
@@ -125,13 +173,19 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
             <div class="card">
                 <h2><span class="pixel-symbol pixel-leaf" aria-hidden="true"></span>MongoDB Migration</h2>
                 <p>Migrate all data from MariaDB to MongoDB. This will clear existing MongoDB data first.</p>
+                <?php if ($migrateMessage): ?>
+                    <p style="color: green;"><strong><?= htmlspecialchars($migrateMessage) ?></strong></p>
+                <?php endif; ?>
+                <?php if ($migrateError): ?>
+                    <p style="color: red;"><strong>Error:</strong> <?= htmlspecialchars($migrateError) ?></p>
+                <?php endif; ?>
                 <?php if (!empty($mongoStatus['error'])): ?>
                     <p><strong>Status:</strong> MongoDB status could not be loaded.</p>
                 <?php elseif ($mongoStatus['migrated']): ?>
-                    <p><strong>Status:</strong> Migrated</p>
+                    <p><strong>Status:</strong> Migrated (querying MongoDB)</p>
                     <p><strong>Migrated at:</strong> <?= htmlspecialchars($mongoStatus['migrated_at']) ?></p>
                 <?php else: ?>
-                    <p><strong>Status:</strong> Not migrated yet</p>
+                    <p><strong>Status:</strong> Not migrated yet (querying MariaDB)</p>
                 <?php endif; ?>
                 <a href="migrate.php" class="btn"><span class="pixel-symbol pixel-rocket small" aria-hidden="true"></span>Migrate to MongoDB</a>
             </div>
@@ -143,6 +197,8 @@ $validImages = array_values(array_filter($imageFiles, function($file) {
                 <a href="add_review.php" class="btn"><span class="pixel-symbol pixel-note small" aria-hidden="true"></span>Add Review SQL</a>
                 <a href="add_review_mongo.php" class="btn"><span class="pixel-symbol pixel-leaf small" aria-hidden="true"></span>Add Review MongoDB</a>
                 <a href="add_movie_mongo.php" class="btn"><span class="pixel-symbol pixel-movie small" aria-hidden="true"></span>Add Movie MongoDB</a>
+                <a href="assign_actor.php" class="btn"><span class="pixel-symbol pixel-user small" aria-hidden="true"></span>Assign Actor SQL</a>
+                <a href="assign_actor_mongo.php" class="btn"><span class="pixel-symbol pixel-leaf small" aria-hidden="true"></span>Assign Actor MongoDB</a>
             </div>
 
             <div class="card">
