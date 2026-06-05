@@ -138,7 +138,7 @@ if ($isMigrated && $mongodb) {
         'content_title' => '$title',
         'genre'         => '$genre',
         'actor_name'    => '$actors.name',
-        'director'      => '$director',
+        'director'      => '$movie_details.director',
     ]];
     $pipeline[] = ['$sort' => ['_id' => -1, 'actor_name' => 1]];
     $pipeline[] = ['$limit' => 5];
