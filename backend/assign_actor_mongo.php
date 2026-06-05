@@ -138,7 +138,6 @@ if ($isMigrated && $mongodb) {
         'content_title' => '$title',
         'genre'         => '$genre',
         'actor_name'    => '$actors.name',
-        'director'      => '$movie_details.director',
     ]];
     $pipeline[] = ['$sort' => ['_id' => -1, 'actor_name' => 1]];
     $pipeline[] = ['$limit' => 5];
@@ -309,24 +308,12 @@ if ($isMigrated && $mongodb) {
                             <th>Actor</th>
                             <th>Content Title</th>
                             <th>Genre</th>
-                            <th>Director</th>
                         </tr>
                         <?php foreach ($report as $row): ?>
-                            <?php
-                                $directorName = '—';
-                                if (!empty($row['director'])) {
-                                    if (is_array($row['director']) || $row['director'] instanceof ArrayObject) {
-                                        $directorName = htmlspecialchars($row['director']['name'] ?? '—');
-                                    } else {
-                                        $directorName = htmlspecialchars((string)$row['director']);
-                                    }
-                                }
-                            ?>
                             <tr>
                                 <td><?= htmlspecialchars($row['actor_name']) ?></td>
                                 <td><?= htmlspecialchars($row['content_title']) ?></td>
                                 <td><?= htmlspecialchars($row['genre']) ?></td>
-                                <td><?= $directorName ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </table>

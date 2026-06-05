@@ -116,13 +116,10 @@ $report_sql = "
     SELECT
         a.name        AS actor_name,
         c.title       AS content_title,
-        c.genre,
-        d.name        AS director_name
+        c.genre
     FROM actor a
     JOIN actor_content ac ON a.actor_id    = ac.actor_id
     JOIN content c        ON ac.content_id = c.content_id
-    LEFT JOIN movie m     ON c.content_id  = m.content_id
-    LEFT JOIN director d  ON m.director_id = d.director_id
     $where_sql
     ORDER BY ac.content_id DESC, a.name
     LIMIT 5
@@ -300,14 +297,12 @@ if (!empty($params)) {
                         <th>Actor</th>
                         <th>Content Title</th>
                         <th>Genre</th>
-                        <th>Director</th>
                     </tr>
                     <?php foreach ($report_rows as $row): ?>
                         <tr>
                             <td><?= htmlspecialchars($row['actor_name']) ?></td>
                             <td><?= htmlspecialchars($row['content_title']) ?></td>
                             <td><?= htmlspecialchars($row['genre']) ?></td>
-                            <td><?= htmlspecialchars($row['director_name'] ?? '—') ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </table>
