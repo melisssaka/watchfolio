@@ -43,7 +43,7 @@ $users    = $sql->query("SELECT * FROM app_user");
 $userDocs = [];
 while ($row = $users->fetch_assoc()) {
     $userDocs[] = [
-        '_id'        => $row['user_id'],
+        '_id'        => (int)$row['user_id'],
         'username'   => $row['username'],
         'name'       => $row['name'],
         'email'      => $row['email'],
@@ -65,7 +65,7 @@ $directorDocs = [];
 $directorMap  = [];
 while ($row = $directors->fetch_assoc()) {
     $doc = [
-        '_id'         => $row['director_id'],
+        '_id'         => (int)$row['director_id'],
         'name'        => $row['name'],
         'nationality' => $row['nationality'],
     ];
@@ -85,7 +85,7 @@ $actorDocs = [];
 $actorMap  = [];
 while ($row = $actors->fetch_assoc()) {
     $doc = [
-        '_id'           => $row['actor_id'],
+        '_id'           => (int)$row['actor_id'],
         'name'          => $row['name'],
         'num_of_awards' => (int)$row['num_of_awards'],
     ];
@@ -121,7 +121,7 @@ while ($row = $contents->fetch_assoc()) {
             'duration'   => (int)$movie['duration'],
             'box_office' => (int)$movie['box_office'],
             'director'   => $director ? [
-                'director_id' => $director['_id'],
+                'director_id' => (int)$director['_id'],
                 'name'        => $director['name'],
                 'nationality' => $director['nationality'],
             ] : null,
@@ -152,7 +152,7 @@ while ($row = $contents->fetch_assoc()) {
         $actorId = $a['actor_id'];
         if (isset($actorMap[$actorId])) {
             $actors[] = [
-                'actor_id'      => $actorId,
+                'actor_id'      => (int)$actorId,
                 'name'          => $actorMap[$actorId]['name'],
                 'num_of_awards' => $actorMap[$actorId]['num_of_awards'],
             ];
@@ -180,7 +180,7 @@ while ($row = $contents->fetch_assoc()) {
     }
 
     $contentDocs[] = [
-        '_id'             => $contentId,
+        '_id'             => (int)$contentId,
         'title'           => $row['title'],
         'genre'           => $row['genre'],
         'release_year'    => (int)$row['release_year'],

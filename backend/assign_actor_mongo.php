@@ -5,7 +5,9 @@ $success    = '';
 $errors     = [];
 $actors     = [];
 $content    = [];
-$report     = null;
+$report     = [];
+$genres     = [];
+$actors_filter = [];
 $isMigrated = false;
 $mongodb    = null;
 
@@ -47,20 +49,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
     $contentDoc = null;
 
     if (!empty($actor_id)) {
-        $actorDoc = $mongodb->actor->findOne(['_id' => $actor_id]);
+        $actorDoc = $mongodb->actor->findOne(['_id' => (int)$actor_id]);
         if (!$actorDoc) $errors[] = 'Selected actor does not exist in MongoDB.';
     }
 
     if (!empty($content_id)) {
-        $contentDoc = $mongodb->content->findOne(['_id' => $content_id]);
+        $contentDoc = $mongodb->content->findOne(['_id' => (int)$content_id]);
         if (!$contentDoc) $errors[] = 'Selected title does not exist in MongoDB.';
     }
 
-    // Check duplicate: actor already in the content's actors array
     if ($actorDoc && $contentDoc) {
         $alreadyAssigned = false;
         foreach ($contentDoc['actors'] ?? [] as $a) {
-            if ((string)$a['actor_id'] === (string)$actor_id) {
+            if ((int)$a['actor_id'] === (int)$actor_id) {
                 $alreadyAssigned = true;
                 break;
             }
@@ -72,9 +73,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
 
     if (empty($errors)) {
         $result = $mongodb->content->updateOne(
-            ['_id' => $content_id],
+            ['_id' => (int)$content_id],
             ['$push' => ['actors' => [
-                'actor_id'      => $actorDoc['_id'],
+                'actor_id'      => (int)$actorDoc['_id'],
                 'name'          => (string)$actorDoc['name'],
                 'num_of_awards' => (int)$actorDoc['num_of_awards'],
             ]]]
@@ -89,36 +90,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
     }
 }
 
-// Fetch dropdowns
+// Selected filter values — empty string means no filter applied
+$selected_genre    = $_GET['genre']    ?? '';
+$selected_actor_id = $_GET['actor_id'] ?? '';
+
 if ($isMigrated && $mongodb) {
+    // Dropdowns for use case form
     foreach ($mongodb->actor->find([], ['sort' => ['name' => 1]]) as $a) {
         $actors[] = [
-            'actor_id'      => $a['_id'],
+            'actor_id'      => (int)$a['_id'],
             'name'          => (string)$a['name'],
             'num_of_awards' => (int)$a['num_of_awards'],
         ];
     }
+    $actors_filter = $actors; // same list used for the report filter
 
     foreach ($mongodb->content->find([], ['sort' => ['title' => 1], 'projection' => ['_id' => 1, 'title' => 1, 'type' => 1]]) as $c) {
         $content[] = [
-            'content_id' => $c['_id'],
+            'content_id' => (int)$c['_id'],
             'title'      => (string)$c['title'],
-            'type'       => (string)$c['type'],
+            'type'       => (string)($c['type'] ?? 'unknown'),
         ];
     }
 
-    // Analytics: top actors by number of titles via aggregation
-    $report = $mongodb->content->aggregate([
-        ['$unwind' => '$actors'],
-        ['$group'  => [
-            '_id'           => '$actors.actor_id',
-            'actor_name'    => ['$first' => '$actors.name'],
-            'num_of_awards' => ['$first' => '$actors.num_of_awards'],
-            'total_titles'  => ['$sum' => 1],
-        ]],
-        ['$sort'  => ['total_titles' => -1]],
-        ['$limit' => 10],
-    ])->toArray();
+    // Dynamic genre list
+    $genreResults = $mongodb->content->distinct('genre');
+    sort($genreResults);
+    $genres = $genreResults;
+
+    // Build aggregation pipeline with optional filters
+    $matchStage = [];
+    if (!empty($selected_genre))    $matchStage['genre']           = $selected_genre;
+    if (!empty($selected_actor_id)) $matchStage['actors.actor_id'] = (int)$selected_actor_id;
+
+    $pipeline = [];
+    if (!empty($matchStage)) {
+        $pipeline[] = ['$match' => $matchStage];
+    }
+    $pipeline[] = ['$unwind' => '$actors'];
+
+    // Re-apply actor filter after unwind so only matching actor rows appear
+    if (!empty($selected_actor_id)) {
+        $pipeline[] = ['$match' => ['actors.actor_id' => (int)$selected_actor_id]];
+    }
+
+    $pipeline[] = ['$project' => [
+        'content_title' => '$title',
+        'genre'         => '$genre',
+        'actor_name'    => '$actors.name',
+        'director'      => '$director',
+    ]];
+    $pipeline[] = ['$sort' => ['_id' => -1, 'actor_name' => 1]];
+    $pipeline[] = ['$limit' => 5];
+
+    $report = $mongodb->content->aggregate($pipeline)->toArray();
 }
 ?>
 <!DOCTYPE html>
@@ -127,7 +152,10 @@ if ($isMigrated && $mongodb) {
     <title>Assign Actor (MongoDB) - Watchfolio</title>
     <link rel="stylesheet" href="assets/css/pixel-theme.css">
     <style>
-        :root { --primary: #ffaac7; --secondary: #e9c3d5; --accent: #f3c3cf; --danger: #ffc9e6; --bg: #fbd6ee; --card-bg: #ffffff; --text: #333333; }
+        :root {
+            --primary: #ffaac7; --secondary: #e9c3d5; --accent: #f3c3cf;
+            --danger: #ffc9e6; --bg: #fbd6ee; --card-bg: #ffffff; --text: #333333;
+        }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); line-height: 1.6; }
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
         .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); margin-bottom: 20px; border: 1px solid #e2e8f0; }
@@ -146,6 +174,12 @@ if ($isMigrated && $mongodb) {
         th { background: var(--primary); }
         .header { text-align: center; margin: 40px 0 30px; }
         .header h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; }
+        .filter-form { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-group label { margin-top: 0; font-weight: 700; font-size: 14px; }
+        .filter-group select { width: auto; min-width: 160px; margin-top: 0; }
+        .filter-form button { margin-top: 0; padding: 10px 20px; }
+        .active-filters { font-size: 13px; color: #666; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -162,6 +196,7 @@ if ($isMigrated && $mongodb) {
             <p>Link an actor to a movie or TV show in MongoDB.</p>
         </div>
 
+        <!-- USE CASE FORM -->
         <div class="card">
             <?php if (!empty($errors)): ?>
                 <div class="error">
@@ -216,27 +251,90 @@ if ($isMigrated && $mongodb) {
             <?php endif; ?>
         </div>
 
+        <!-- ANALYTICS REPORT -->
         <div class="card">
-            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics: Top Actors by Number of Titles (MongoDB)</h2>
-            <p>Actors ranked by how many movies and TV shows they appear in.</p>
-            <?php if (!empty($report)): ?>
-                <table>
-                    <tr>
-                        <th>Actor</th>
-                        <th>Awards</th>
-                        <th>Total Titles</th>
-                    </tr>
-                    <?php foreach ($report as $row): ?>
+            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics: 5 Recent Actor Assignments (MongoDB)</h2>
+            <p>Shows the 5 most recent actor-content assignments, including the director. Filter by genre or actor to narrow results.</p>
+
+            <?php if ($isMigrated && !empty($genres)): ?>
+                <form method="GET" class="filter-form">
+                    <div class="filter-group">
+                        <label for="genre">Genre</label>
+                        <select name="genre" id="genre">
+                            <option value="">-- All Genres --</option>
+                            <?php foreach ($genres as $g): ?>
+                                <option value="<?= htmlspecialchars($g) ?>" <?= $g === $selected_genre ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($g) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="actor_id">Actor</label>
+                        <select name="actor_id" id="actor_id">
+                            <option value="">-- All Actors --</option>
+                            <?php foreach ($actors_filter as $a): ?>
+                                <option value="<?= (int)$a['actor_id'] ?>" <?= $a['actor_id'] == $selected_actor_id ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($a['name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <button type="submit">Apply</button>
+                    <?php if (!empty($selected_genre) || !empty($selected_actor_id)): ?>
+                        <a href="?" class="btn" style="margin-top:0; padding: 10px 20px; background: var(--secondary);">Clear</a>
+                    <?php endif; ?>
+                </form>
+
+                <?php
+                    $active = [];
+                    if (!empty($selected_genre)) $active[] = 'Genre: <strong>' . htmlspecialchars($selected_genre) . '</strong>';
+                    if (!empty($selected_actor_id)) {
+                        foreach ($actors_filter as $a) {
+                            if ($a['actor_id'] == $selected_actor_id) {
+                                $active[] = 'Actor: <strong>' . htmlspecialchars($a['name']) . '</strong>';
+                                break;
+                            }
+                        }
+                    }
+                    if (!empty($active)) echo '<p class="active-filters">Active filters: ' . implode(' &amp; ', $active) . '</p>';
+                    else echo '<p class="active-filters">Showing all results.</p>';
+                ?>
+
+                <?php if (!empty($report)): ?>
+                    <table>
                         <tr>
-                            <td><?= htmlspecialchars($row['actor_name']) ?></td>
-                            <td><?= (int)$row['num_of_awards'] ?></td>
-                            <td><?= (int)$row['total_titles'] ?></td>
+                            <th>Actor</th>
+                            <th>Content Title</th>
+                            <th>Genre</th>
+                            <th>Director</th>
                         </tr>
-                    <?php endforeach; ?>
-                </table>
-            <?php elseif ($isMigrated): ?>
-                <p>No actor assignments in MongoDB yet.</p>
-            <?php else: ?>
+                        <?php foreach ($report as $row): ?>
+                            <?php
+                                $directorName = '—';
+                                if (!empty($row['director'])) {
+                                    if (is_array($row['director']) || $row['director'] instanceof ArrayObject) {
+                                        $directorName = htmlspecialchars($row['director']['name'] ?? '—');
+                                    } else {
+                                        $directorName = htmlspecialchars((string)$row['director']);
+                                    }
+                                }
+                            ?>
+                            <tr>
+                                <td><?= htmlspecialchars($row['actor_name']) ?></td>
+                                <td><?= htmlspecialchars($row['content_title']) ?></td>
+                                <td><?= htmlspecialchars($row['genre']) ?></td>
+                                <td><?= $directorName ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </table>
+                <?php else: ?>
+                    <p>No results found. Try assigning an actor first or adjusting the filters.</p>
+                <?php endif; ?>
+
+            <?php elseif (!$isMigrated): ?>
                 <p>Migrate SQL data to MongoDB first to view this report.</p>
             <?php endif; ?>
         </div>

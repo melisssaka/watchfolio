@@ -25,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     if (empty($actor_id))   $errors[] = 'Please select an actor.';
     if (empty($content_id)) $errors[] = 'Please select a title.';
 
-    // Check actor exists
     if (!empty($actor_id)) {
         $chk = $conn->prepare('SELECT actor_id FROM actor WHERE actor_id = ?');
         $chk->bind_param('i', $actor_id);
@@ -35,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         $chk->close();
     }
 
-    // Check content exists
     if (!empty($content_id)) {
         $chk = $conn->prepare('SELECT content_id FROM content WHERE content_id = ?');
         $chk->bind_param('i', $content_id);
@@ -45,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         $chk->close();
     }
 
-    // Check duplicate assignment
     if (!empty($actor_id) && !empty($content_id)) {
         $chk = $conn->prepare('SELECT actor_id FROM actor_content WHERE actor_id = ? AND content_id = ?');
         $chk->bind_param('ii', $actor_id, $content_id);
@@ -59,7 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         $stmt = $conn->prepare('INSERT INTO actor_content (actor_id, content_id) VALUES (?, ?)');
         $stmt->bind_param('ii', $actor_id, $content_id);
         if ($stmt->execute()) {
-            // Fetch names for the success message
             $aRow = $conn->query("SELECT name FROM actor WHERE actor_id = $actor_id")->fetch_assoc();
             $cRow = $conn->query("SELECT title FROM content WHERE content_id = $content_id")->fetch_assoc();
             $success = "Actor '{$aRow['name']}' successfully assigned to '{$cRow['title']}'.";
@@ -71,9 +67,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     }
 }
 
-// Dropdowns
-$actors  = $conn->query('SELECT actor_id, name, num_of_awards FROM actor ORDER BY name');
-$content = $conn->query('
+// Dropdowns for use case form
+$actors_dropdown  = $conn->query('SELECT actor_id, name, num_of_awards FROM actor ORDER BY name');
+$content_dropdown = $conn->query('
     SELECT c.content_id, c.title,
            CASE WHEN m.content_id IS NOT NULL THEN "movie" ELSE "tv_show" END AS type
     FROM content c
@@ -81,15 +77,73 @@ $content = $conn->query('
     ORDER BY c.title
 ');
 
-// Analytics: top actors by number of titles they appear in
-$report = $conn->query('
-    SELECT a.name AS actor_name, a.num_of_awards, COUNT(ac.content_id) AS total_titles
+// Dynamic filter options for the report
+$genres_result = $conn->query('SELECT DISTINCT genre FROM content ORDER BY genre');
+$genres = [];
+while ($g = $genres_result->fetch_assoc()) {
+    $genres[] = $g['genre'];
+}
+
+$actors_result = $conn->query('SELECT actor_id, name FROM actor ORDER BY name');
+$actors_filter = [];
+while ($a = $actors_result->fetch_assoc()) {
+    $actors_filter[] = $a;
+}
+
+// Selected filter values — empty string means no filter applied
+$selected_genre    = $_GET['genre']    ?? '';
+$selected_actor_id = $_GET['actor_id'] ?? '';
+
+// Build analytics query dynamically based on active filters
+$where_clauses = [];
+$params        = [];
+$types         = '';
+
+if (!empty($selected_genre)) {
+    $where_clauses[] = 'c.genre = ?';
+    $params[]        = $selected_genre;
+    $types          .= 's';
+}
+if (!empty($selected_actor_id)) {
+    $where_clauses[] = 'a.actor_id = ?';
+    $params[]        = (int)$selected_actor_id;
+    $types          .= 'i';
+}
+
+$where_sql = !empty($where_clauses) ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
+
+$report_sql = "
+    SELECT
+        a.name        AS actor_name,
+        c.title       AS content_title,
+        c.genre,
+        d.name        AS director_name
     FROM actor a
-    JOIN actor_content ac ON a.actor_id = ac.actor_id
-    GROUP BY a.actor_id, a.name, a.num_of_awards
-    ORDER BY total_titles DESC
-    LIMIT 10
-');
+    JOIN actor_content ac ON a.actor_id    = ac.actor_id
+    JOIN content c        ON ac.content_id = c.content_id
+    LEFT JOIN movie m     ON c.content_id  = m.content_id
+    LEFT JOIN director d  ON m.director_id = d.director_id
+    $where_sql
+    ORDER BY ac.content_id DESC, a.name
+    LIMIT 5
+";
+
+$report_rows = [];
+if (!empty($params)) {
+    $stmt = $conn->prepare($report_sql);
+    $stmt->bind_param($types, ...$params);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $report_rows[] = $row;
+    }
+    $stmt->close();
+} else {
+    $result = $conn->query($report_sql);
+    while ($row = $result->fetch_assoc()) {
+        $report_rows[] = $row;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -97,7 +151,10 @@ $report = $conn->query('
     <title>Assign Actor - Watchfolio</title>
     <link rel="stylesheet" href="assets/css/pixel-theme.css">
     <style>
-        :root { --primary: #ffaac7; --secondary: #e9c3d5; --accent: #f3c3cf; --danger: #ffc9e6; --bg: #fbd6ee; --card-bg: #ffffff; --text: #333333; }
+        :root {
+            --primary: #ffaac7; --secondary: #e9c3d5; --accent: #f3c3cf;
+            --danger: #ffc9e6; --bg: #fbd6ee; --card-bg: #ffffff; --text: #333333;
+        }
         body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg); color: var(--text); line-height: 1.6; }
         .container { max-width: 900px; margin: 0 auto; padding: 20px; }
         .card { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06); margin-bottom: 20px; border: 1px solid #e2e8f0; }
@@ -116,6 +173,12 @@ $report = $conn->query('
         th { background: var(--primary); }
         .header { text-align: center; margin: 40px 0 30px; }
         .header h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 10px; }
+        .filter-form { display: flex; align-items: flex-end; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-group label { margin-top: 0; font-weight: 700; font-size: 14px; }
+        .filter-group select { width: auto; min-width: 160px; margin-top: 0; }
+        .filter-form button { margin-top: 0; padding: 10px 20px; }
+        .active-filters { font-size: 13px; color: #666; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -132,6 +195,7 @@ $report = $conn->query('
             <p>Link an actor to a movie or TV show in the SQL database.</p>
         </div>
 
+        <!-- USE CASE FORM -->
         <div class="card">
             <?php if (!empty($errors)): ?>
                 <div class="error">
@@ -152,7 +216,7 @@ $report = $conn->query('
                 <label>Title *</label>
                 <select name="content_id">
                     <option value="">-- Select a Title --</option>
-                    <?php while ($c = $content->fetch_assoc()): ?>
+                    <?php while ($c = $content_dropdown->fetch_assoc()): ?>
                         <option value="<?= $c['content_id'] ?>"
                             <?= (isset($_POST['content_id']) && $_POST['content_id'] == $c['content_id']) ? 'selected' : '' ?>>
                             <?= htmlspecialchars($c['title']) ?> (<?= htmlspecialchars($c['type']) ?>)
@@ -164,7 +228,7 @@ $report = $conn->query('
                 <label>Actor *</label>
                 <select name="actor_id">
                     <option value="">-- Select an Actor --</option>
-                    <?php while ($a = $actors->fetch_assoc()): ?>
+                    <?php while ($a = $actors_dropdown->fetch_assoc()): ?>
                         <option value="<?= $a['actor_id'] ?>"
                             <?= (isset($_POST['actor_id']) && $_POST['actor_id'] == $a['actor_id']) ? 'selected' : '' ?>>
                             <?= htmlspecialchars($a['name']) ?> (<?= (int)$a['num_of_awards'] ?> awards)
@@ -179,26 +243,76 @@ $report = $conn->query('
             </form>
         </div>
 
+        <!-- ANALYTICS REPORT -->
         <div class="card">
-            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics: Top Actors by Number of Titles</h2>
-            <p>Actors ranked by how many movies and TV shows they appear in.</p>
-            <?php if ($report && $report->num_rows > 0): ?>
+            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics: 5 Recent Actor Assignments</h2>
+            <p>Shows the 5 most recent actor-content assignments, including the director. Filter by genre or actor to narrow results.</p>
+
+            <form method="GET" class="filter-form">
+                <div class="filter-group">
+                    <label for="genre">Genre</label>
+                    <select name="genre" id="genre">
+                        <option value="">-- All Genres --</option>
+                        <?php foreach ($genres as $g): ?>
+                            <option value="<?= htmlspecialchars($g) ?>" <?= $g === $selected_genre ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($g) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="actor_id">Actor</label>
+                    <select name="actor_id" id="actor_id">
+                        <option value="">-- All Actors --</option>
+                        <?php foreach ($actors_filter as $a): ?>
+                            <option value="<?= (int)$a['actor_id'] ?>" <?= $a['actor_id'] == $selected_actor_id ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($a['name']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <button type="submit">Apply</button>
+                <?php if (!empty($selected_genre) || !empty($selected_actor_id)): ?>
+                    <a href="?" class="btn" style="margin-top:0; padding: 10px 20px; background: var(--secondary);">Clear</a>
+                <?php endif; ?>
+            </form>
+
+            <?php
+                $active = [];
+                if (!empty($selected_genre)) $active[] = 'Genre: <strong>' . htmlspecialchars($selected_genre) . '</strong>';
+                if (!empty($selected_actor_id)) {
+                    foreach ($actors_filter as $a) {
+                        if ($a['actor_id'] == $selected_actor_id) {
+                            $active[] = 'Actor: <strong>' . htmlspecialchars($a['name']) . '</strong>';
+                            break;
+                        }
+                    }
+                }
+                if (!empty($active)) echo '<p class="active-filters">Active filters: ' . implode(' &amp; ', $active) . '</p>';
+                else echo '<p class="active-filters">Showing all results.</p>';
+            ?>
+
+            <?php if (!empty($report_rows)): ?>
                 <table>
                     <tr>
                         <th>Actor</th>
-                        <th>Awards</th>
-                        <th>Total Titles</th>
+                        <th>Content Title</th>
+                        <th>Genre</th>
+                        <th>Director</th>
                     </tr>
-                    <?php while ($row = $report->fetch_assoc()): ?>
+                    <?php foreach ($report_rows as $row): ?>
                         <tr>
                             <td><?= htmlspecialchars($row['actor_name']) ?></td>
-                            <td><?= (int)$row['num_of_awards'] ?></td>
-                            <td><?= (int)$row['total_titles'] ?></td>
+                            <td><?= htmlspecialchars($row['content_title']) ?></td>
+                            <td><?= htmlspecialchars($row['genre']) ?></td>
+                            <td><?= htmlspecialchars($row['director_name'] ?? '—') ?></td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                 </table>
             <?php else: ?>
-                <p>No actor assignments yet.</p>
+                <p>No results found. Try assigning an actor first or adjusting the filters.</p>
             <?php endif; ?>
         </div>
 
