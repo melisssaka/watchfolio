@@ -1,4 +1,10 @@
 <?php
+/**
+ * add_movie_mongo.php
+ * Add New Movie use case (MongoDB) by Melis Saka
+ * Handles form input, validation, duplicate checking, and insertion of a new movie into the MongoDB content collection.
+ * MongoDB PHP Library: https://www.mongodb.com/docs/php-library/current/
+ */
 session_start();
 $success = '';
 $errors = [];
