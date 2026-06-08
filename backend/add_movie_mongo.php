@@ -206,8 +206,8 @@ if ($isMigrated && $mongodb) {
                     <select name="director_id">
                         <option value="">-- Select a Director --</option>
                         <?php foreach ($directors as $dir): ?>
-                            <option value="<?= (int) $dir['director_id'] ?>"
-                                <?= (isset($_POST['director_id']) && $_POST['director_id'] == $dir['director_id']) ? 'selected' : '' ?>>
+                            <option value="<?= (int) $dir['_id'] ?>"
+                                <?= (isset($_POST['director_id']) && $_POST['director_id'] == $dir['_id']) ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($dir['name']) ?> (<?= htmlspecialchars($dir['nationality']) ?>)
                             </option>
                         <?php endforeach; ?>
