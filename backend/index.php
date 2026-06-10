@@ -1,4 +1,13 @@
 <?php
+/**
+ * index.php — Watchfolio homepage
+ * Displays user selector, migration status, latest reviews, and navigation.
+ * Cover images sourced from Pinterest (decorative use only) 
+ * Sparkle cursor: "Tinkerbell Magic Sparkle" via snazzyspace.com
+ * Pixel emoji icons: AI-generated (Codex) only for visiual use, not for ms2 requirements approved per course email (Adrian Hofer, June 2026)
+ * MongoDB PHP Library: https://www.mongodb.com/docs/php-library/current/
+ * Docker PHP image: https://hub.docker.com/_/php
+*/
 session_start();
 require_once __DIR__ . '/db_mode.php';
 
@@ -24,6 +33,7 @@ try {
     if (!file_exists($autoloadPath)) {
         throw new Exception('MongoDB dependencies are not installed yet.');
     }
+    // MongoDB PHP library (https://www.mongodb.com/docs/php-library/current/)
     require_once $autoloadPath;
 
     $mongoHost = getenv('MONGO_HOST') ?: 'mongodb';
@@ -88,6 +98,7 @@ if (is_mongo_mode() && $mongodb !== null) {
     $dbPassword = getenv('DB_PASSWORD') ?: 'watchfolio_pass';
     $dbName     = getenv('DB_NAME')     ?: 'watchfolio';
 
+    // MariaDB via PHP mysqli extension (https://www.php.net/manual/en/book.mysqli.php)
     $conn = new mysqli($dbHost, $dbUser, $dbPassword, $dbName);
 
     $userResult = $conn->query('SELECT user_id, username FROM app_user ORDER BY username');

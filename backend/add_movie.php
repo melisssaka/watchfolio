@@ -1,4 +1,11 @@
 <?php
+/**
+ * add_movie.php 
+ * use case by Melis Saka
+ * Add New Movie use case (MariaDB/SQL)
+ * Handles form input, validation, duplicate checking, and insertion of a new movie into the content and movie tables.
+ * MariaDB via PHP mysqli extension: https://www.php.net/manual/en/book.mysqli.php
+ */
 session_start();
 $dbHost = getenv('DB_HOST') ?: 'mariadb';
 $dbUser = getenv('DB_USER') ?: 'watchfolio_user';

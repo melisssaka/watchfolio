@@ -1,3 +1,11 @@
+/*
+Tinkerbell Magic Sparkle cursor effect
+Original source: "Tinkerbell Magic Sparkle" (c) 2005 mf2fm web-design, http://www.mf2fm.com/rv
+Via: https://www.snazzyspace.com/tumblr/mouse-sparkles.php
+Adapted and rewritten as an ES6 IIFE for Watchfolio
+*/
+
+
 // Tinkerbell-style sparkle cursor
 (() => {
     const colour = "#FFFFFF";
