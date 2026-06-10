@@ -139,7 +139,6 @@ if ($isMigrated && $mongodb) {
         'genre'         => '$genre',
         'actor_name'    => '$actors.name',
     ]];
-    $pipeline[] = ['$sort' => ['_id' => -1, 'actor_name' => 1]];
     $pipeline[] = ['$limit' => 5];
 
     $report = $mongodb->content->aggregate($pipeline)->toArray();
@@ -252,8 +251,8 @@ if ($isMigrated && $mongodb) {
 
         <!-- ANALYTICS REPORT -->
         <div class="card">
-            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics: 5 Recent Actor Assignments (MongoDB)</h2>
-            <p>Shows the 5 most recent actor-content assignments, including the director. Filter by genre or actor to narrow results.</p>
+            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics: Actor Assignments (MongoDB)</h2>
+            <p>Shows up to 5 actor-content assignments. Filter by genre or actor to narrow results.</p>
 
             <?php if ($isMigrated && !empty($genres)): ?>
                 <form method="GET" class="filter-form">

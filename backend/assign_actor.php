@@ -121,7 +121,6 @@ $report_sql = "
     JOIN actor_content ac ON a.actor_id    = ac.actor_id
     JOIN content c        ON ac.content_id = c.content_id
     $where_sql
-    ORDER BY ac.content_id DESC, a.name
     LIMIT 5
 ";
 
@@ -242,8 +241,8 @@ if (!empty($params)) {
 
         <!-- ANALYTICS REPORT -->
         <div class="card">
-            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics: 5 Recent Actor Assignments</h2>
-            <p>Shows the 5 most recent actor-content assignments, including the director. Filter by genre or actor to narrow results.</p>
+            <h2><span class="pixel-symbol pixel-star" aria-hidden="true"></span>Analytics: Actor Assignments</h2>
+            <p>Shows up to 5 actor-content assignments. Filter by genre or actor to narrow results.</p>
 
             <form method="GET" class="filter-form">
                 <div class="filter-group">
