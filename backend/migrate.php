@@ -1,18 +1,23 @@
 <?php
 // ============================================
 // migrate.php – Migrates all data from MariaDB to MongoDB
+// This script reads everything from our SQL database and writes it
+// into MongoDB. We only do this once - after migration the app
+// switches to MongoDB permanently and SQL is no longer used.
 // ============================================
 ob_start();
 require_once __DIR__ . '/db_mode.php';
 
-// ---- 1. Connect to MariaDB ----
+// 1. Connect to MariaDB 
+// grabbing the connection details from environment variables
+// (set in docker-compose.yml)
 $dbHost     = getenv('DB_HOST')     ?: 'mariadb';
 $dbUser     = getenv('DB_USER')     ?: 'watchfolio_user';
 $dbPassword = getenv('DB_PASSWORD') ?: 'watchfolio_pass';
 $dbName     = getenv('DB_NAME')     ?: 'watchfolio';
 
 $sql = new mysqli($dbHost, $dbUser, $dbPassword, $dbName);
-if ($sql->connect_error) {
+if ($sql->connect_error) {    // if we can't connect to SQL there's nothing to migrate
     ob_end_clean();
     session_start();
     $_SESSION['migrate_error'] = 'MariaDB connection failed: ' . $sql->connect_error;
@@ -20,7 +25,7 @@ if ($sql->connect_error) {
     exit;
 }
 
-// ---- 2. Connect to MongoDB ----
+// 2. Connect to MongoDB 
 require_once __DIR__ . '/vendor/autoload.php';
 
 $mongoHost = getenv('MONGO_HOST') ?: 'mongodb';
@@ -29,16 +34,19 @@ $mongoPort = getenv('MONGO_PORT') ?: '27017';
 $mongo = new MongoDB\Client("mongodb://$mongoHost:$mongoPort");
 $db    = $mongo->watchfolio_db;
 
-// ---- 3. Clear all MongoDB collections first ----
+// 3. Clear all MongoDB collections first 
+// we drop everything before migrating so we don't end up
+// with duplicate data if someone clicks the migrate button twice
 $db->app_user->drop();
 $db->director->drop();
 $db->actor->drop();
 $db->content->drop();
 $db->config->drop();
 
-// ============================================
-// ---- 4. Migrate app_user ----
-// ============================================
+
+// 4. Migrate app_user
+// straightforward - just copy all users over
+// _id maps to user_id from SQL
 $users    = $sql->query("SELECT * FROM app_user");
 $userDocs = [];
 while ($row = $users->fetch_assoc()) {
@@ -57,9 +65,10 @@ if (!empty($userDocs)) {
 }
 $userCount = count($userDocs);
 
-// ============================================
-// ---- 5. Migrate director ----
-// ============================================
+
+// 5. Migrate director 
+// we also keep a $directorMap so we can look up directors
+// by id later when building the content documents
 $directors   = $sql->query("SELECT * FROM director");
 $directorDocs = [];
 $directorMap  = [];
@@ -77,9 +86,9 @@ if (!empty($directorDocs)) {
 }
 $directorCount = count($directorDocs);
 
-// ============================================
-// ---- 6. Migrate actor ----
-// ============================================
+
+// 6. Migrate actor 
+// same idea as directors - keep a map for later lookup
 $actors   = $sql->query("SELECT * FROM actor");
 $actorDocs = [];
 $actorMap  = [];
@@ -97,22 +106,30 @@ if (!empty($actorDocs)) {
 }
 $actorCount = count($actorDocs);
 
-// ============================================
-// ---- 7. Migrate content (most complex) ----
-// ============================================
+// 7. Migrate content 
+// in SQL we have separate tables for
+// movie, tv_show, actor_content, tv_shows_directors, and review.
+// in MongoDB we bring all of this together into one content document.
+// so for each content item we need to:
+//   - figure out if it's a movie or tv_show
+//   - embed the director (for movies) or director_ids array (for tv shows)
+//   - embed all assigned actors as an array
+//   - embed all reviews as an array
+
 $contents    = $sql->query("SELECT * FROM content");
 $contentDocs = [];
 
 while ($row = $contents->fetch_assoc()) {
     $contentId = $row['content_id'];
-
+    // check if this content is a movie or tv show
     $movieResult = $sql->query("SELECT * FROM movie WHERE content_id = $contentId");
     $tvResult    = $sql->query("SELECT * FROM tv_show WHERE content_id = $contentId");
 
     $movie = $movieResult->fetch_assoc();
     $tv    = $tvResult->fetch_assoc();
     $type  = $movie ? 'movie' : 'tv_show';
-
+    // build movie_details with embedded director
+    // movies only have one director so we can embed directly   
     $movieDetails = null;
     if ($movie) {
         $directorId   = $movie['director_id'];
@@ -127,7 +144,9 @@ while ($row = $contents->fetch_assoc()) {
             ] : null,
         ];
     }
-
+     // build tv_show_details
+    // tv shows can have multiple directors so we store director_ids as an array
+    // instead of embedding the full director objects (to avoid duplication)
     $tvDetails = null;
     if ($tv) {
         $tvDirectors = $sql->query(
@@ -143,7 +162,8 @@ while ($row = $contents->fetch_assoc()) {
             'director_ids' => $directorIds,
         ];
     }
-
+    // embed actors - in SQL this was a separate bridge table (actor_content)
+    // in MongoDB we just push actor data directly into the content document
     $actorResult = $sql->query(
         "SELECT actor_id FROM actor_content WHERE content_id = $contentId"
     );
@@ -158,7 +178,9 @@ while ($row = $contents->fetch_assoc()) {
             ];
         }
     }
-
+    // embed reviews - also denormalized into the content document
+    // we join with app_user here so we have the username available
+    // without needing to do a separate lookup later
     $reviewResult = $sql->query(
         "SELECT r.*, u.username
          FROM review r
@@ -179,6 +201,7 @@ while ($row = $contents->fetch_assoc()) {
         ];
     }
 
+    // put it all together into one content document
     $contentDocs[] = [
         '_id'             => (int)$contentId,
         'title'           => $row['title'],
@@ -198,9 +221,11 @@ if (!empty($contentDocs)) {
 }
 $contentCount = count($contentDocs);
 
-// ============================================
-// ---- 8. Set migration flag ----
-// ============================================
+
+//  8. Set migration flag 
+// this flag is how the app knows migration is done
+// db_config.php checks this on every request and blocks
+// any further SQL access once it's set
 $db->config->insertOne([
     '_id'         => 'migration_status',
     'migrated'    => true,

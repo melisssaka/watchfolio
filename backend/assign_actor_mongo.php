@@ -1,6 +1,7 @@
 <?php
 session_start();
-
+// initialize everything to empty/false so the page
+// doesn't crash if MongoDB isn't connected yet
 $success    = '';
 $errors     = [];
 $actors     = [];
@@ -11,6 +12,8 @@ $actors_filter = [];
 $isMigrated = false;
 $mongodb    = null;
 
+    // check if composer dependencies are installed
+    // this was a problem during development so I handle it explicitly
 try {
     $autoloadPath = __DIR__ . '/vendor/autoload.php';
     if (!file_exists($autoloadPath)) {
@@ -18,12 +21,15 @@ try {
     }
     require_once $autoloadPath;
 
+    // get MongoDB connection details from docker-compose environment variables
     $mongoHost = getenv('MONGO_HOST') ?: 'mongodb';
     $mongoPort = getenv('MONGO_PORT') ?: '27017';
 
     $mongo   = new MongoDB\Client("mongodb://$mongoHost:$mongoPort");
     $mongodb = $mongo->watchfolio_db;
 
+    // check the config collection to see if migration has been done
+    // I set this flag in migrate.php after a successful migration
     $migrationStatus = $mongodb->config->findOne(['_id' => 'migration_status']);
     $isMigrated      = $migrationStatus && !empty($migrationStatus['migrated']);
 
@@ -34,6 +40,7 @@ try {
     $errors[] = 'MongoDB connection failed: ' . $e->getMessage();
 }
 
+// user must be selected on homepage before using this page
 if (!isset($_SESSION['user_id'])) {
     $errors[] = 'Please select a user on the homepage first.';
 }
@@ -42,22 +49,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
     $actor_id   = trim($_POST['actor_id']   ?? '');
     $content_id = trim($_POST['content_id'] ?? '');
 
+    // basic validation
     if (empty($actor_id))   $errors[] = 'Please select an actor.';
     if (empty($content_id)) $errors[] = 'Please select a title.';
 
     $actorDoc   = null;
     $contentDoc = null;
 
+     // look up the actor document in MongoDB by _id
     if (!empty($actor_id)) {
         $actorDoc = $mongodb->actor->findOne(['_id' => (int)$actor_id]);
         if (!$actorDoc) $errors[] = 'Selected actor does not exist in MongoDB.';
     }
 
+    // look up the content document in MongoDB by _id
     if (!empty($content_id)) {
         $contentDoc = $mongodb->content->findOne(['_id' => (int)$content_id]);
         if (!$contentDoc) $errors[] = 'Selected title does not exist in MongoDB.';
     }
 
+    // check if this actor is already in the content's actors array
+    // in MongoDB there's no composite primary key like in SQL so we
+    // have to check manually by looping through the embedded array
     if ($actorDoc && $contentDoc) {
         $alreadyAssigned = false;
         foreach ($contentDoc['actors'] ?? [] as $a) {
@@ -72,6 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
     }
 
     if (empty($errors)) {
+         // use $push to add the actor into the embedded actors array
+        // inside the content document - this replaces what was an
+        // INSERT into actor_content in the SQL version
         $result = $mongodb->content->updateOne(
             ['_id' => (int)$content_id],
             ['$push' => ['actors' => [
@@ -105,6 +121,9 @@ if ($isMigrated && $mongodb) {
     }
     $actors_filter = $actors; // same list used for the report filter
 
+    // load all content titles for the use case form dropdown
+    // we only need _id, title and type so we use projection to avoid
+    // fetching the whole document including embedded actors and reviews
     foreach ($mongodb->content->find([], ['sort' => ['title' => 1], 'projection' => ['_id' => 1, 'title' => 1, 'type' => 1]]) as $c) {
         $content[] = [
             'content_id' => (int)$c['_id'],
@@ -113,12 +132,13 @@ if ($isMigrated && $mongodb) {
         ];
     }
 
-    // Dynamic genre list
+    // Dynamic genre list : get all distinct genres from the content collection for the filter dropdown
     $genreResults = $mongodb->content->distinct('genre');
     sort($genreResults);
     $genres = $genreResults;
 
-    // Build aggregation pipeline with optional filters
+     // build the aggregation pipeline for the analytics report
+    // I add $match stages only if the filters are actually active
     $matchStage = [];
     if (!empty($selected_genre))    $matchStage['genre']           = $selected_genre;
     if (!empty($selected_actor_id)) $matchStage['actors.actor_id'] = (int)$selected_actor_id;
@@ -129,11 +149,15 @@ if ($isMigrated && $mongodb) {
     }
     $pipeline[] = ['$unwind' => '$actors'];
 
-    // Re-apply actor filter after unwind so only matching actor rows appear
+    // re-apply the actor filter AFTER unwind
+    // this is needed because before unwind I only filtered documents
+    // that contain the actor, but after unwind I need to keep only
+    // the specific actor row and drop the others
     if (!empty($selected_actor_id)) {
         $pipeline[] = ['$match' => ['actors.actor_id' => (int)$selected_actor_id]];
     }
 
+    // select only the fields we want to display in the report table (limit to 5)
     $pipeline[] = ['$project' => [
         'content_title' => '$title',
         'genre'         => '$genre',

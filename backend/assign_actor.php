@@ -1,5 +1,6 @@
 <?php
 session_start();
+// grab database connection details from docker-compose environment variables
 
 $dbHost     = getenv('DB_HOST')     ?: 'mariadb';
 $dbUser     = getenv('DB_USER')     ?: 'watchfolio_user';
@@ -14,6 +15,7 @@ if ($conn->connect_error) {
 $success = '';
 $errors  = [];
 
+// user must be selected on homepage before using this page
 if (!isset($_SESSION['user_id'])) {
     $errors[] = 'Please select a user on the homepage first.';
 }
@@ -25,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
     if (empty($actor_id))   $errors[] = 'Please select an actor.';
     if (empty($content_id)) $errors[] = 'Please select a title.';
 
+    // make sure the selected actor actually exists in the database
+    // (just in case someone manually edits the form values)
     if (!empty($actor_id)) {
         $chk = $conn->prepare('SELECT actor_id FROM actor WHERE actor_id = ?');
         $chk->bind_param('i', $actor_id);
@@ -34,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         $chk->close();
     }
 
+    // same for content
     if (!empty($content_id)) {
         $chk = $conn->prepare('SELECT content_id FROM content WHERE content_id = ?');
         $chk->bind_param('i', $content_id);
@@ -43,6 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         $chk->close();
     }
 
+    // check if this actor is already assigned to this content
+    // the actor_content table has a composite primary key so duplicates
+    // would cause a SQL error anyway, but better to catch it here first
+    // and show a friendly message instead
     if (!empty($actor_id) && !empty($content_id)) {
         $chk = $conn->prepare('SELECT actor_id FROM actor_content WHERE actor_id = ? AND content_id = ?');
         $chk->bind_param('ii', $actor_id, $content_id);
@@ -52,14 +61,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         $chk->close();
     }
 
+        // all checks passed - insert the new relationship into actor_content
+        // this is the core of the use case (many-to-many assignment)
     if (empty($errors)) {
         $stmt = $conn->prepare('INSERT INTO actor_content (actor_id, content_id) VALUES (?, ?)');
         $stmt->bind_param('ii', $actor_id, $content_id);
-        if ($stmt->execute()) {
+        if ($stmt->execute()) {// fetch names just for the success message
             $aRow = $conn->query("SELECT name FROM actor WHERE actor_id = $actor_id")->fetch_assoc();
             $cRow = $conn->query("SELECT title FROM content WHERE content_id = $content_id")->fetch_assoc();
             $success = "Actor '{$aRow['name']}' successfully assigned to '{$cRow['title']}'.";
-            $_POST = [];
+            $_POST = []; // clear form after success
         } else {
             $errors[] = 'Insert failed: ' . $stmt->error;
         }
@@ -69,6 +80,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
 
 // Dropdowns for use case form
 $actors_dropdown  = $conn->query('SELECT actor_id, name, num_of_awards FROM actor ORDER BY name');
+// we use a CASE here to figure out if each content item is a movie or tv_show
+// since that info lives in separate tables (movie/tv_show) not in content itself
 $content_dropdown = $conn->query('
     SELECT c.content_id, c.title,
            CASE WHEN m.content_id IS NOT NULL THEN "movie" ELSE "tv_show" END AS type
@@ -77,13 +90,13 @@ $content_dropdown = $conn->query('
     ORDER BY c.title
 ');
 
-// Dynamic filter options for the report
+// Dynamic filter options for the report (get genre)
 $genres_result = $conn->query('SELECT DISTINCT genre FROM content ORDER BY genre');
 $genres = [];
 while ($g = $genres_result->fetch_assoc()) {
     $genres[] = $g['genre'];
 }
-
+// get actors for the report filter dropdown
 $actors_result = $conn->query('SELECT actor_id, name FROM actor ORDER BY name');
 $actors_filter = [];
 while ($a = $actors_result->fetch_assoc()) {
@@ -110,8 +123,13 @@ if (!empty($selected_actor_id)) {
     $types          .= 'i';
 }
 
+// only add WHERE clause if at least one filter is active
 $where_sql = !empty($where_clauses) ? 'WHERE ' . implode(' AND ', $where_clauses) : '';
 
+// this is the main analytics query from MS1
+// joins actor -> actor_content -> content to show which actors
+// are assigned to which content, filtered by genre and/or actor
+// limited to 5
 $report_sql = "
     SELECT
         a.name        AS actor_name,
@@ -124,6 +142,8 @@ $report_sql = "
     LIMIT 5
 ";
 
+// if filters are active we use prepared statements to avoid SQL injection
+// otherwise just run the query directly
 $report_rows = [];
 if (!empty($params)) {
     $stmt = $conn->prepare($report_sql);
