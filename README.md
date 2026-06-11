@@ -1,4 +1,28 @@
-For the images here are the sources:
+# Watchfolio – Milestone 2
+
+A movie and TV show tracker web app. Runs three Docker containers: the web app (PHP 8.2 + Apache), MariaDB (SQL), and MongoDB (NoSQL).
+
+## Requirements
+- Docker
+- unzip
+
+## How to run
+1. Unzip the submission
+2. Navigate into the folder: `cd watchfolio`
+3. Build and start the containers: `docker compose up --build`
+4. Open http://localhost:8080 in your browser
+5. Click **Generate Data** to create the database with randomised data
+6. Select a user from the dropdown to have a logged-in session
+7. Use the SQL use cases
+8. Click **Migrate to MongoDB** to switch to MongoDB mode
+9. Use the MongoDB use cases
+
+## MongoDB indexes
+The index scripts for each use case are in the project root:
+`Student1_Indexes.js`, `Student2_Indexes.js`, `Student3_Indexes.js`.
+
+## Image sources
+The background images in `backend/images/` are not original. Sources:
 
 1.jpeg : https://de.pinterest.com/pin/210402613837031303/
 10.jpeg : https://share.google/sABTwoKmcD256xZiw
