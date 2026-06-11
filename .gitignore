@@ -9,3 +9,6 @@ docker-volumes/
 
 # Mac system files
 .DS_Store
+
+# Runtime files
+backend/.db_mode
