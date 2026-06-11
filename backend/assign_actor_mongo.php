@@ -163,7 +163,9 @@ if ($isMigrated && $mongodb) {
         'genre'         => '$genre',
         'actor_name'    => '$actors.name',
     ]];
-    $pipeline[] = ['$limit' => 5];
+    if (empty($selected_genre) && empty($selected_actor_id)) {
+        $pipeline[] = ['$limit' => 5];
+    }
 
     $report = $mongodb->content->aggregate($pipeline)->toArray();
 }

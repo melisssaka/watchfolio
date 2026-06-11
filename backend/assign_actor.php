@@ -129,7 +129,7 @@ $where_sql = !empty($where_clauses) ? 'WHERE ' . implode(' AND ', $where_clauses
 // this is the main analytics query from MS1
 // joins actor -> actor_content -> content to show which actors
 // are assigned to which content, filtered by genre and/or actor
-// limited to 5
+$limit_sql = (empty($selected_genre) && empty($selected_actor_id)) ? 'LIMIT 5' : '';
 $report_sql = "
     SELECT
         a.name        AS actor_name,
@@ -139,7 +139,7 @@ $report_sql = "
     JOIN actor_content ac ON a.actor_id    = ac.actor_id
     JOIN content c        ON ac.content_id = c.content_id
     $where_sql
-    LIMIT 5
+    $limit_sql
 ";
 
 // if filters are active we use prepared statements to avoid SQL injection
