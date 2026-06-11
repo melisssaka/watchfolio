@@ -2,6 +2,13 @@
 session_start();
 // initialize everything to empty/false so the page
 // doesn't crash if MongoDB isn't connected yet
+// Sources:
+// https://www.mongodb.com/docs/php-library/current/
+// https://www.mongodb.com/docs/manual/crud/
+// for mongodb operators:
+// https://www.mongodb.com/docs/manual/reference/operator/update/push/
+// https://www.mongodb.com/docs/manual/core/aggregation-pipeline/
+// https://www.mongodb.com/docs/manual/data-modeling/concepts/embedding-vs-references/
 $success    = '';
 $errors     = [];
 $actors     = [];

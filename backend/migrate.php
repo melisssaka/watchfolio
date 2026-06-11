@@ -4,12 +4,17 @@
 // This script reads everything from our SQL database and writes it
 // into MongoDB. We only do this once - after migration the app
 // switches to MongoDB permanently and SQL is no longer used.
+// sources that mostly used : 
+//  https://www.mongodb.com/docs/php-library/current/
+// https://www.mongodb.com/docs/manual/crud/
+// https://www.mongodb.com/docs/manual/data-modeling/concepts/embedding-vs-references/
 // ============================================
 ob_start();
 require_once __DIR__ . '/db_mode.php';
 
 // 1. Connect to MariaDB 
 // grabbing the connection details from environment variables
+//source : https://www.php.net/manual/en/function.getenv.php
 // (set in docker-compose.yml)
 $dbHost     = getenv('DB_HOST')     ?: 'mariadb';
 $dbUser     = getenv('DB_USER')     ?: 'watchfolio_user';
@@ -130,6 +135,7 @@ while ($row = $contents->fetch_assoc()) {
     $type  = $movie ? 'movie' : 'tv_show';
     // build movie_details with embedded director
     // movies only have one director so we can embed directly   
+    //source : https://www.mongodb.com/docs/manual/data-modeling/concepts/embedding-vs-references/
     $movieDetails = null;
     if ($movie) {
         $directorId   = $movie['director_id'];
@@ -147,6 +153,7 @@ while ($row = $contents->fetch_assoc()) {
      // build tv_show_details
     // tv shows can have multiple directors so we store director_ids as an array
     // instead of embedding the full director objects (to avoid duplication)
+    // source : https://www.mongodb.com/docs/manual/data-modeling/concepts/embedding-vs-references/
     $tvDetails = null;
     if ($tv) {
         $tvDirectors = $sql->query(
@@ -202,6 +209,7 @@ while ($row = $contents->fetch_assoc()) {
     }
 
     // put it all together into one content document
+    // https://www.mongodb.com/docs/manual/data-modeling/
     $contentDocs[] = [
         '_id'             => (int)$contentId,
         'title'           => $row['title'],
