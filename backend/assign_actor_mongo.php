@@ -215,6 +215,11 @@ if ($isMigrated && $mongodb) {
                     <span class="pixel-symbol pixel-rocket small" aria-hidden="true"></span>
                     Migrate SQL Data to MongoDB first
                 </a>
+            <?php elseif (!isset($_SESSION['user_id'])): ?>
+                <a href="index.php" class="btn">
+                    <span class="pixel-symbol pixel-user small" aria-hidden="true"></span>
+                    Select a user on the homepage first
+                </a>
             <?php else: ?>
                 <form method="POST">
                     <h2><span class="pixel-symbol pixel-movie" aria-hidden="true"></span>Select Title</h2>

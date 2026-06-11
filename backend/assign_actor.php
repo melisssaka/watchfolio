@@ -207,6 +207,12 @@ if (!empty($params)) {
                 <div class="success"><?= htmlspecialchars($success) ?></div>
             <?php endif; ?>
 
+            <?php if (!isset($_SESSION['user_id'])): ?>
+                <a href="index.php" class="btn">
+                    <span class="pixel-symbol pixel-user small" aria-hidden="true"></span>
+                    Select a user on the homepage first
+                </a>
+            <?php else: ?>
             <form method="POST">
                 <h2><span class="pixel-symbol pixel-movie" aria-hidden="true"></span>Select Title</h2>
                 <label>Title *</label>
@@ -237,6 +243,7 @@ if (!empty($params)) {
                     Assign Actor
                 </button>
             </form>
+            <?php endif; ?>
         </div>
 
         <!-- ANALYTICS REPORT -->
