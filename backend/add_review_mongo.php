@@ -1,6 +1,6 @@
 <?php
 session_start();
-
+#general source: playlist used to learn https://www.youtube.com/watch?v=9gEPiIoAHo8&list=PLC3y8-rFHvwiXX1maB5o-CZAIHy4I_ILv&index=1
 $success = '';
 $errors = [];
 $contentItems = [];
@@ -23,10 +23,10 @@ try {
 
     $mongoHost = getenv('MONGO_HOST') ?: 'mongodb';
     $mongoPort = getenv('MONGO_PORT') ?: '27017';
-
+    # MongoDB connection created using the official MongoDB PHP library: https://www.mongodb.com/docs/php-library/current/connect/
     $mongo = new MongoDB\Client("mongodb://$mongoHost:$mongoPort");
     $mongodb = $mongo->watchfolio_db;
-
+    #source https://www.mongodb.com/docs/php-library/current/crud/query/retrieve/
     $migrationStatus = $mongodb->config->findOne([
         '_id' => 'migration_status'
     ]);
@@ -60,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
     }
 
     if (empty($errors)) {
+        #source https://www.w3schools.com/mongodb/mongodb_aggregations_intro.php
         $maxReviewResult = $mongodb->content->aggregate([
             [
                 '$unwind' => [
@@ -82,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
         if (!empty($maxReviewResult) && isset($maxReviewResult[0]['max_review_number'])) {
             $reviewNumber = ((int) $maxReviewResult[0]['max_review_number']) + 1;
         }
-
+        # sorce https://www.geeksforgeeks.org/mongodb/mongodb-updateone-method-db-collection-updateone/
         $updateResult = $mongodb->content->updateOne(
             [
                 '_id' => [
@@ -116,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && $isM
         }
     }
 }
-
+# source https://www.w3schools.com/mongodb/mongodb_mongosh_find.php
 if ($isMigrated && $mongodb) {
     $contentItems = $mongodb->content->find(
         [],
@@ -138,6 +139,15 @@ if ($isMigrated && $mongodb) {
     if (isset($_SESSION['user_id'])) {
         $reportResult = $mongodb->content->aggregate([
             [
+                '$match' => [
+                    'reviews.user_id' => (int) $_SESSION['user_id']
+                ]
+            ],
+            [
+           /*
+            * $unwind deconstructs review arrays into individual documents.
+            * source: https://www.mongodb.com/docs/manual/reference/operator/aggregation/unwind/
+            */
                 '$unwind' => [
                     'path' => '$reviews',
                     'preserveNullAndEmptyArrays' => false
@@ -149,6 +159,7 @@ if ($isMigrated && $mongodb) {
                 ]
             ],
             [
+                #source: https://www.mongodb.com/docs/manual/reference/operator/aggregation/group/
                 '$group' => [
                     '_id' => '$reviews.user_id',
                     'username' => [
@@ -190,6 +201,7 @@ if ($isMigrated && $mongodb) {
             [
                 '$addFields' => [
                     'watch_preference' => [
+                        #https://www.mongodb.com/docs/manual/reference/operator/aggregation/switch/
                         '$switch' => [
                             'branches' => [
                                 [

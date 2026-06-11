@@ -1,11 +1,18 @@
 <?php
+/*
+ * PHP session management!
+ * source: https://www.php.net/manual/en/function.session-start.php
+ */
 session_start();
-
+/*
+ * Database configuration loaded through environment variables.
+ * source: https://www.php.net/manual/en/function.getenv.php
+ */
 $dbHost = getenv('DB_HOST') ?: 'mariadb';
 $dbUser = getenv('DB_USER') ?: 'watchfolio_user';
 $dbPassword = getenv('DB_PASSWORD') ?: 'watchfolio_pass';
 $dbName = getenv('DB_NAME') ?: 'watchfolio';
-
+# source https://www.php.net/manual/en/book.mysqli.php
 $conn = new mysqli($dbHost, $dbUser, $dbPassword, $dbName);
 
 if ($conn->connect_error) {
@@ -41,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id'])) {
         $nextReviewResult = $conn->query('SELECT COALESCE(MAX(review_number), 0) + 1 AS next_review_number FROM review');
         $nextReviewRow = $nextReviewResult->fetch_assoc();
         $reviewNumber = (int) $nextReviewRow['next_review_number'];
-
+        #source https://www.php.net/manual/en/mysqli.quickstart.prepared-statements.php
         $stmt = $conn->prepare('
             INSERT INTO review
             (

@@ -1,10 +1,10 @@
 <?php
-
+# source https://www.php.net/manual/en/function.getenv.php
 $dbHost = getenv('DB_HOST') ?: 'mariadb';
 $dbUser = getenv('DB_USER') ?: 'watchfolio_user';
 $dbPassword = getenv('DB_PASSWORD') ?: 'watchfolio_pass';
 $dbName = getenv('DB_NAME') ?: 'watchfolio';
-
+#source: https://www.php.net/manual/en/book.mysqli.php
 $conn = new mysqli($dbHost, $dbUser, $dbPassword, $dbName);
 
 if ($conn->connect_error) {
@@ -211,7 +211,8 @@ $reviewReplyTexts = [
     'I think nostalgia is influencing your opinion a bit.'
 ];
 
-// ---- If MongoDB mode: clear all MongoDB data and reset flag to SQL ----
+// If MongoDB mode: clear all MongoDB data and reset flag to SQL
+#source https://www.mongodb.com/docs/php-library/current/ 
 require_once __DIR__ . '/db_mode.php';
 if (is_mongo_mode()) {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -230,7 +231,7 @@ if (is_mongo_mode()) {
     }
     set_db_mode('sql');
 }
-
+#sources https://mariadb.com/docs/server/architecture/server-constraints/foreign-key-constraints 
 runQuery($conn, 'SET FOREIGN_KEY_CHECKS = 0', 'Could not disable foreign key checks');
 runQuery($conn, 'TRUNCATE TABLE actor_content', 'Could not empty actor_content');
 runQuery($conn, 'TRUNCATE TABLE tv_shows_directors', 'Could not empty tv_shows_directors');
@@ -250,7 +251,13 @@ for ($i = 1; $i <= 20; $i++) {
     $birthYear = rand(1980, 2010);
     $gender = $genders[array_rand($genders)];
     $password = 'password123';
-
+    /*
+     * SQL queries are executed using prepared statements
+     * to safely bind parameters and avoid SQL injection.
+     *
+     * Source:
+     * https://www.php.net/manual/en/mysqli.quickstart.prepared-statements.php
+     */
     $stmt = $conn->prepare("
         INSERT INTO app_user
         (
@@ -265,7 +272,11 @@ for ($i = 1; $i <= 20; $i++) {
         VALUES
         (?, ?, ?, ?, ?, ?, ?)
     ");
-
+    /*
+     * Parameters are bound using MySQLi prepared statements.
+     * Source:
+     * https://www.php.net/manual/en/mysqli-stmt.bind-param.php
+    */
     $stmt->bind_param('isssiss', $i, $username, $name, $email, $birthYear, $gender, $password);
     $stmt->execute();
     $stmt->close();
@@ -380,7 +391,7 @@ $generatedActorContent = 0;
 while ($generatedActorContent < 40) {
     $actorId = rand(1, 20);
     $contentId = rand(1, 40);
-
+    #source https://mariadb.com/docs/server/reference/sql-statements/data-manipulation/inserting-loading-data/insert-ignore
     $stmt = $conn->prepare("
         INSERT IGNORE INTO actor_content
         (
@@ -453,12 +464,18 @@ while ($generatedTvShowDirectors < 35) {
 }
 
 $existingReviews = [];
+#source https://www.php.net/manual/en/function.rand.php
+/*
+ * Self-referencing review relationship based on MariaDB foreign key design:
+ * https://mariadb.com/docs/server/ha-and-performance/optimization-and-tuning/optimization-and-indexes/foreign-keys
+ */
 
 for ($i = 1; $i <= 90; $i++) {
     $reviewNumber = $i;
     $userId = rand(1, 20);
     $contentId = rand(1, 40);
     $rating = rand(1, 5);
+    #source https://www.w3schools.com/PHP/func_array_rand.asp and https://www.php.net/manual/en/function.array-rand.php
     $reviewText = $reviewTexts[array_rand($reviewTexts)];
 
     $stmt = $conn->prepare("
